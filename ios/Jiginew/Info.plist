@@ -26,14 +26,8 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSExceptionDomains</key>
-		<dict>
-			<key>localhost</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-			</dict>
-		</dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
@@ -51,5 +45,93 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>AntDesign.ttf</string>
+		<string>Entypo.ttf</string>
+		<string>EvilIcons.ttf</string>
+		<string>Feather.ttf</string>
+		<string>FontAwesome.ttf</string>
+		<string>FontAwesome5_Brands.ttf</string>
+		<string>FontAwesome5_Regular.ttf</string>
+		<string>FontAwesome5_Solid.ttf</string>
+		<string>FontAwesome6_Brands.ttf</string>
+		<string>FontAwesome6_Regular.ttf</string>
+		<string>FontAwesome6_Solid.ttf</string>
+		<string>Foundation.ttf</string>
+		<string>Ionicons.ttf</string>
+		<string>MaterialIcons.ttf</string>
+		<string>MaterialCommunityIcons.ttf</string>
+		<string>SimpleLineIcons.ttf</string>
+		<string>Octicons.ttf</string>
+		<string>Zocial.ttf</string>
+		<string>Fontisto.ttf</string>
+		<string>Merriweather-Black.ttf</string>
+		<string>Merriweather-BlackItalic.ttf</string>
+		<string>Merriweather-Bold.ttf</string>
+		<string>Merriweather-BoldItalic.ttf</string>
+		<string>Merriweather-Italic.ttf</string>
+		<string>Merriweather-Light.ttf</string>
+		<string>Merriweather-LightItalic.ttf</string>
+		<string>Merriweather-Regular.ttf</string>
+		<string>Raleway-Black.ttf</string>
+		<string>Raleway-BlackItalic.ttf</string>
+		<string>Raleway-Bold.ttf</string>
+		<string>Raleway-BoldItalic.ttf</string>
+		<string>Raleway-ExtraBold.ttf</string>
+		<string>Raleway-ExtraBoldItalic.ttf</string>
+		<string>Raleway-ExtraLight.ttf</string>
+		<string>Raleway-ExtraLightItalic.ttf</string>
+		<string>Raleway-Italic.ttf</string>
+		<string>Raleway-Light.ttf</string>
+		<string>Raleway-LightItalic.ttf</string>
+		<string>Raleway-Medium.ttf</string>
+		<string>Raleway-MediumItalic.ttf</string>
+		<string>Raleway-Regular.ttf</string>
+		<string>Raleway-SemiBold.ttf</string>
+		<string>Raleway-SemiBoldItalic.ttf</string>
+		<string>Raleway-Thin.ttf</string>
+		<string>Raleway-ThinItalic.ttf</string>
+		<string>Roboto-Black.ttf</string>
+		<string>Roboto-BlackItalic.ttf</string>
+		<string>Roboto-Bold.ttf</string>
+		<string>Roboto-BoldItalic.ttf</string>
+		<string>Roboto-Italic.ttf</string>
+		<string>Roboto-Light.ttf</string>
+		<string>Roboto-LightItalic.ttf</string>
+		<string>Roboto-Medium.ttf</string>
+		<string>Roboto-MediumItalic.ttf</string>
+		<string>Roboto-Regular.ttf</string>
+		<string>Roboto-Thin.ttf</string>
+		<string>Roboto-ThinItalic.ttf</string>
+		<string>PoppinsBlack-VxOe.otf</string>
+		<string>PoppinsBlackItalic-JXmK.otf</string>
+		<string>PoppinsBold-GdJA.otf</string>
+		<string>PoppinsBoldItalic-jgZy.otf</string>
+		<string>PoppinsExtrabold-zDdL.otf</string>
+		<string>PoppinsExtraboldItalic-5J8v.otf</string>
+		<string>PoppinsExtralight-6Je1.otf</string>
+		<string>PoppinsExtralightItalic-yDBV.otf</string>
+		<string>PoppinsItalic-9nE2.otf</string>
+		<string>PoppinsLight-l4Zw.otf</string>
+		<string>PoppinsLightItalic-nexO.otf</string>
+		<string>PoppinsMedium-1JPv.otf</string>
+		<string>PoppinsMediumItalic-REKE.otf</string>
+		<string>PoppinsRegular-B2Bw.otf</string>
+		<string>PoppinsSemibold-8l8n.otf</string>
+		<string>PoppinsSemiboldItalic-Y132.otf</string>
+		<string>PoppinsThin-rO2B.otf</string>
+		<string>PoppinsThinItalic-M4YP.otf</string>
+		<string>OpenSans-B9K8.ttf</string>
+		<string>OpenSansBold-8wJJ.ttf</string>
+		<string>OpenSansBoldItalic-YWD4.ttf</string>
+		<string>OpenSansExtrabold-rpoL.ttf</string>
+		<string>OpenSansExtraboldItalic-Mmon.ttf</string>
+		<string>OpenSansItalic-KwXl.ttf</string>
+		<string>OpenSansLight-2Yxe.ttf</string>
+		<string>OpenSansLightItalic-vOW4.ttf</string>
+		<string>OpenSansSemibold-wO7w.ttf</string>
+		<string>OpenSansSemiboldItalic-7vaB.ttf</string>
+	</array>
 </dict>
 </plist>

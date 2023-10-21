@@ -1,0 +1,17 @@
+import { useState } from "react"
+
+const [balanceAllocatedType , setBalanceAllocatedType] = useState<string | undefined>('GLOBAL')
+
+const [balanceAllocated , setBalanceAllocated] = useState<string | undefined>(Balance[3].currentBal)
+const [balanceInitialHT , setBalanceInitialHT] = useState<string | undefined>(Balance[4].currentBal)
+const [balanceTaxes , setBalanceTaxes] = useState<string | undefined>(Balance[5].currentBal)
+const [balanceRallonge , setBalanceRallonge] = useState<string | undefined>(Balance[6].currentBal)
+
+const [balAllocatedPercent , setBalAllocatedPercent] = useState<string | undefined>(Balance[3].percent)
+const [balInitialHTPercent, setBalInitialHTPercent] = useState<string | undefined>(Balance[4].percent)
+const [balTaxesPercent , setBalTaxesPercent] = useState<string | undefined>(Balance[5].percent)
+const [balRallongePercent , setBalRallongePercent] = useState<string | undefined>(Balance[6].percent)
+
+const [balInitialHTTitle , setBalInitialHTTitle] = useState<string | undefined>('Initial HT')
+const [balTaxesTitle , setBalTaxesTitle] = useState<string | undefined>('Droits de Douanes')
+const [balRallongeTitle , setBalRallongeTitle] = useState<string | undefined>('Rallonges')

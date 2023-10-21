@@ -8,45 +8,42 @@
  * @format
  */
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
+  View ,
   StyleSheet,
-  Text,
-  useColorScheme,
-  View,
+  Image,
+  ScrollView
 } from 'react-native';
-
-import {
-  Colors
-} from 'react-native/Libraries/NewAppScreen';
+import WelcomeScreen from './src/screens/Auth/WelcomeScreen/index'
+import LoginScreen from './src/screens/Auth/SignInScreen'
+import SignUpScreen from './src/screens/Auth/SignUpScreen'
+import ResetPasswordScreen from './src/screens/Auth/ResetPasswordScreen/ResetPasswordScreen';
+import Navigation from './src/screens/Navigation'
+import Text  from './src/components/Text'
+import Button from './src/components/Button'
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons'
+import colors from './src/theme/colors'
+import Icon from './src/components/Icon'
+import Card03 from './src/components/Card/Card03'
+import HeaderHome from './src/components/Card/HeaderHome'
+import HeaderCard from './src/components/Card/HeaderCard'
+import Transaction from './src/components/Transactions/Transaction'
+import TitleList from './src/components/TitleList';
+import PickerSelect from './src/components/PickerSelect';
+import { useState } from 'react';
+import AuthContextProvider from './src/screens/Context/AuthContextProvider';
 
 const Jiginew = () => {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  }
-
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <View>
-          <Text> hello test </Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
-
+    <AuthContextProvider>
+      <Navigation />
+    </AuthContextProvider>
+  )
+}
 const styles = StyleSheet.create({
-  
-});
+  app : {
+    flex : 1,
+    marginTop : 50,
+  },
+})
 
 export default Jiginew

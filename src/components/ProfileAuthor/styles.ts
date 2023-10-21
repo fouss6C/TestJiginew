@@ -1,0 +1,28 @@
+import { StyleSheet } from 'react-native';
+import { colors } from '../../theme';
+
+export default StyleSheet.create({
+  contain: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+  },
+  contentLeft: {
+    flex: 8,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  thumb: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 5,
+  },
+  contentRight: {
+    flex: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: colors.card,
+    borderWidth: 1,
+  },
+})
