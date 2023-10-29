@@ -35,6 +35,5 @@ OptionSelected.propTypes = {
   textRight: PropTypes.string,
   onPress: PropTypes.func,
   primary: PropTypes.bool
-};
-
+}
 export default OptionSelected

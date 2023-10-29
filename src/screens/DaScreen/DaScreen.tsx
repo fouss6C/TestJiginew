@@ -1,7 +1,6 @@
 import { View, FlatList, TouchableOpacity, RefreshControl,  } from 'react-native'
-import React , { useState } from 'react'
+import React , { useContext, useEffect, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import DAchats from '../../assets/data/DemandesAchats'
 import  TextInput  from '../../components/TextInput'
 import IconFont from 'react-native-vector-icons/FontAwesome5'
 import IconMaterial from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -19,6 +18,9 @@ import TabTag from '../../components/TabTag'
 import PieChart from '../../components/PieChart'
 import DemandesSummary from  '../../assets/data/DemandesSummary'
 import EmptyList from '../../components/EmptyList'
+import axios from 'axios'
+import { BaseURL } from '../../assets/config/config'
+import { AuthContext } from '../Context/AuthContextProvider'
 
 
 
@@ -45,21 +47,48 @@ const DaScreen = () => {
   const insets = useSafeAreaInsets()
   const [refreshing] = useState(false)
   const [category, setCategory] = useState('')
-  const [categories, setCategories] = useState(DAchats)
+  const [categories, setCategories] = useState([])
   const navigation = useNavigation()
+  const { userToken } = useContext(AuthContext)
   // filter hooks 
   const [daStatus] = useState(DaStatus)
   const [daActID] = useState(DaActID)
   const [daOwner] = useState(DaOwner)
-  const [status, setStatus] = useState(DaStatus[0]) // for goback
-  const [actID, setActID] = useState(DaActID[0]) // for  goback
-  const [owner, setOwner] = useState(DaOwner[0])
 
   const [actModalVisible , setActModalVisible]=useState(false)
   const [statusModalVisible , setStatusModalVisible]=useState(false)
   const [ownerModalVisible , setOwnerModalVisible]=useState(false)
 
   const [tab, setTab] = useState(tabs[0])
+  const [ demandes , setDemandes ] = useState([])
+ 
+  useEffect( () => {
+    const response = async () => {
+      await axios.get(`${BaseURL}/demandeAchats`,
+    { headers: {
+      //'Content-Type': 'multipart/form-data' , 
+      'Authorization' : `Bearer ${userToken?.access_token}`,
+      'Accept' : 'application/json'
+    }}
+    ).then(res => {
+        console.log (res.data)
+        setDemandes (res.data)
+        setCategories(res.data)
+      }).catch((error)=> {
+        if( error.code == 'ERR_BAD_REQUEST') {
+          //Alert.alert( 'No response from server , check the URL ..')
+          console.log(error.message)
+        } else {
+         // Alert.alert(error.message)
+         console.log(error.message)
+        }
+        console.log(error.code)
+      }).then( function () {
+        //
+      })
+    }
+    response()
+  }, [])
   
   const onAccountSelect = (option) => {
     //setActID(option)
@@ -84,13 +113,13 @@ const DaScreen = () => {
   const filterCategory = (text) => {
     setCategory(text)
     if (text) {
-      setCategories(DAchats.filter((item) => 
-      haveChildren(item.name, text) || haveChildren(item.status, text)|| 
-      haveChildren(item.daNumber, text) || haveChildren(item.projectID, text) ||
-      haveChildren(item.actID, text) || haveChildren(item.groupID, text)
+      setCategories(demandes.filter((item) => 
+      haveChildren(item.name, text) || haveChildren(item.status?.tag, text)|| 
+      haveChildren(item.daNumber, text) || haveChildren(item.projectID?.projectID, text) ||
+      haveChildren(item.projectID?.actID, text) || haveChildren(item.createdBy?.groupID?.groupID, text)
       ));
     } else {
-      setCategories(DAchats)
+      setCategories(demandes)
       setTab(tabs[0])
     }
   }
@@ -158,7 +187,7 @@ const DaScreen = () => {
           }
         />
        
-        <View style = {{ flex : 1 , width : '100%' , marginTop : 1}}>
+        <View style = {{ flex : 1 , width : '100%'}}>
         <FlatList
             contentContainerStyle={{}}
             showsHorizontalScrollIndicator={false}
@@ -177,15 +206,15 @@ const DaScreen = () => {
             renderItem={({ item }) => (
               <Transaction2Col
                 key={item.id}
-                initial ={item.userTag}
-                reference = {'DA'+item.daNumber}
-                actID = {item.projectID}
+                initial ={''+item.createdBy?.tag}
+                reference = { item.daNumber? 'DA' + item.daNumber : 'DA' + item.reference }
+                actID = {item.projectID?.projectID}
                 name={item.name}
                 date={item.createdAt}
-                status={item.status}
-                price={'K'+item.amountTTC}
+                status={item.status?.status}
+                price={'KX'+ (item.amountTTC / Math.pow(10,3)).toFixed(2)}
                 isUp={item.isUp}
-                backgroundIcon={item.groupColor}
+                backgroundIcon={item.createdBy?.groupID?.color?.tag}
                 onPress={navigateToDaDetail(item)}
               />
             )}

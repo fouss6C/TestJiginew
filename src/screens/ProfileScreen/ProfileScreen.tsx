@@ -19,7 +19,7 @@ const ProfileScreen = (props) => {
   const insets = useSafeAreaInsets()
   const [Loading, setLoading] = useState(false)
   const [userData] = useState(UserData[0])
-  const { setUserToken } = useContext(AuthContext)
+  const { userToken , setUserToken } = useContext(AuthContext)
 
   const styleItem = {
     ...styles.profileItem,
@@ -50,16 +50,16 @@ const ProfileScreen = (props) => {
           <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
               <ProfileDetail
                // image={userData.image}
-                textFirst={userData.name}
-                point={userData.point}
-                textSecond={userData.email}
-                textThird={userData.matricule}
+                textFirst={userToken?.auth_user.firstName + ' '  + userToken?.auth_user.lastName}
+                point={'N+'+ userToken?.auth_user.groupID.hierarchy}
+                textSecond={userToken?.auth_user.email}
+                textThird={userToken?.auth_user.matricule}
                 onPress={() => {}}
               />
               <View style={styles.viewFollow}>
                 <View style={{ flex: 3 }}>
                   <Tag outline style={styles.follow}>
-                    {userData.groupName}
+                    {userToken?.auth_user.groupID.name}
                   </Tag>
                 </View>
 
@@ -67,7 +67,7 @@ const ProfileScreen = (props) => {
                   <ProfileStatistics data={userData.performance} />
                 </View>
               </View>
-            <View style={{ width: '100%' , marginTop : 10 }}>
+            <View style={{ width: '100%' , marginTop : 15 }}>
                 <TouchableOpacity
                   style={styleItem}
                   onPress={() => {
@@ -116,6 +116,21 @@ const ProfileScreen = (props) => {
                 <TouchableOpacity
                   style={styleItem}
                   onPress={() => {
+                   // navigation.navigate('ChangePassword');
+                  }}
+                >
+                  <Text body1>{'Paramètres de comptes'}</Text>
+                  <Icon
+                    name="angle-right"
+                    size={18}
+                    color={colors.primary}
+                    style={{ marginLeft: 5 }}
+                    enableRTL={true}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styleItem}
+                  onPress={() => {
                     //navigation.navigate('ContactUs');
                   }}
                 >
@@ -135,7 +150,7 @@ const ProfileScreen = (props) => {
             <Button  
               style={{ marginHorizontal: 20, marginTop:30 }} 
               loading={Loading} 
-              outline
+              round
               onPress={signOutSubmit}
             >
             {'Me Deconnecter'}

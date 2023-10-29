@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { StyleSheet, TouchableOpacity } from 'react-native'
+import { StyleSheet, TouchableOpacity, View } from 'react-native'
 import {font , colors, BaseStyle, Typography} from '../../../theme'
 import Text from '../../Text'
 import styles from './styles'
@@ -18,10 +18,19 @@ function HeaderCard({ title = '', badge='' , value = '', isCenter = false, isPri
         isCenter && styles.headerCardCenter,
         style,
       ])}
-      onPress={()=>{}}
+      onPress={onPress}
     >
-      
-      <Text body1 light={!isPrimary} primary ={isPrimary}>
+      <View style = {{position : 'absolute' , top : 2 , right : 2, }}>
+        <Icon
+          name={'autorenew'}
+          size={28}
+          style={{
+            color: colors.primary,
+          }}
+          solid
+        />
+      </View>
+      <Text headline light={!isPrimary} primary ={isPrimary}>
         { title }
       </Text>
       

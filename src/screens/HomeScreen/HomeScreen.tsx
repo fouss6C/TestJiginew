@@ -1,5 +1,5 @@
 import { View, Text , Pressable, ScrollView, FlatList, RefreshControl, TouchableOpacity, Alert} from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import HeaderHome from '../../components/Card/HeaderHome'
 import HeaderCard from '../../components/Card/HeaderCard'
@@ -7,36 +7,50 @@ import colors from '../../theme/colors'
 import styles from './styles'
 import Card03 from '../../components/Card/Card03'
 import Card04 from '../../components/Card/Card04'
-import DAccountMain from '../../assets/data/BalanceAccounts'
+//import account from '../../assets/data/BalanceAccounts'
 import Price2Col from '../../components/Price2Col'
 import FilterBar from '../../components/FilterBar'
 import Balance from '../../assets/data/BalanceGlobal'
 import { useNavigation } from '@react-navigation/native'
 import { RootNavigationProp } from '../../types/Navigation'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-// import Balance data 
+import { AuthContext } from '../Context/AuthContextProvider'
+import axios from 'axios'
+import { BaseURL } from '../../assets/config/config'
+import EmptyList from '../../components/EmptyList'
+
+// get global account variables from axios call 
 
 const HomeScreen = () => {
 
   const insets = useSafeAreaInsets()
+  const {userToken} = useContext(AuthContext)
   const [filter, setFilter] = useState({
     leftValue: false,
     centerValue: false,
     rightValue: true,
   })
   const [refreshing] = useState(false)
-  const [AccountMain, setAccountMain] = useState(DAccountMain)
-  const user = 'test user'
+  const [accountMain, setAccountMain] = useState([])
   const navigation = useNavigation<RootNavigationProp>()
   //const [balanceSelected , setBalancedSelected] = useState(Balance) 
 
-  // Balance Available value change state
+  // Balance Oracle state Variale 
+
+  // Balance Available state variable 
+  const [balanceOracleType , setBalanceOracleType] = useState<string | undefined>('GLOBAL')
+  const [balanceOracle , setBalanceOracle] = useState<string | undefined>(Balance[0].currentBal)
+  //const [balOraclePercent , setBalOraclePercent] = useState<string | undefined>(Balance[0].percent)
+  //const [balAvailableUp , setBalAvailableUp] = useState<undefined | boolean>(Balance[0].isUp)
+  const [balOracleTitle , setBalOracleTitle] = useState<string | undefined>('Solde Réel')
+
+  // Balance Available state variable 
   const [balanceAvailableType , setBalanceAvailableType] = useState<string | undefined>('GLOBAL')
   const [balanceAvailable , setBalanceAvailable] = useState<string | undefined>(Balance[1].currentBal)
   const [balAvailablePercent , setBalAvailablePercent] = useState<string | undefined>(Balance[1].percent)
   const [balAvailableUp , setBalAvailableUp] = useState<undefined | boolean>(Balance[1].isUp)
   const [balAvailableTitle , setBalAvailableTitle] = useState<string | undefined>('Global interne')
-
+ 
   const [balanceEngagedType , setBalanceEngagedType] = useState<string | undefined>('GLOBAL')
   const [balanceEngaged , setBalanceEngaged] = useState<string | undefined>(Balance[2].currentBal)
   const [balEngagedPercent , setBalEngagedPercent] = useState<string | undefined>(Balance[2].percent)
@@ -57,7 +71,34 @@ const HomeScreen = () => {
   const [balInitialHTTitle , setBalInitialHTTitle] = useState<string | undefined>('Initial HT')
   const [balTaxesTitle , setBalTaxesTitle] = useState<string | undefined>('Droits de Douanes')
   const [balRallongeTitle , setBalRallongeTitle] = useState<string | undefined>('Rallonges')
+  
+  const toggleBalOracle = () => {
 
+    if (balanceOracleType =='GLOBAL') {
+  
+        setBalanceOracle(Balance[0].currentBalCapex)
+        //setBalOraclePercent(Balance[1].percentCapex)
+        //setBalAvailableUp(Balance[1].isUpCapex)
+        setBalOracleTitle("Solde Capex  ")
+        setBalanceOracleType('CAPEX')
+  
+      } else if (balanceOracleType == 'CAPEX') {
+        setBalanceAvailable(Balance[0].currentBalOpex)
+        //setBalOraclePercent(Balance[1].percentOpex)
+        //setBalAvailableUp(Balance[1].isUpOpex)
+        setBalOracleTitle("Solde Opex ")
+        setBalanceOracleType('OPEX')
+  
+      } else {
+  
+        setBalanceOracle(Balance[0].currentBal)
+        //setBalOraclePercent(Balance[1].percent)
+        //setBalOracleUp(Balance[1].isUp)
+        setBalOracleTitle("Solde Réel")
+        setBalanceOracleType('GLOBAL')
+      } 
+    }
+  
   const toggleBalAvailable = () => {
 
   if (balanceAvailableType =='GLOBAL') {
@@ -162,19 +203,53 @@ const HomeScreen = () => {
     }
   }
 
+
+//const [account ,setAccount] = useState([])
+useEffect( () => {
+    const response = async () => {
+      await axios.get(`${BaseURL}/accounts`,
+    { headers: {
+      //'Content-Type': 'multipart/form-data' , 
+      'Authorization' : `Bearer ${userToken?.access_token}`,
+      'Accept' : 'application/json'
+    }}
+    ).then(res => {
+        console.log (res.data)
+        //setAccount (res.data)
+        setAccountMain(res.data)
+      }).catch((error)=> {
+        if( error.code == 'ERR_BAD_REQUEST') {
+          //Alert.alert( 'No response from server , check the URL ..')
+          console.log(error.message)
+        } else {
+         // Alert.alert(error.message)
+         console.log(error.message)
+        }
+        console.log(error.code)
+      }).then( function () {
+        //
+      })
+    }
+    response()
+  }, [])
+
+
   const navigateToProfile = () => {
-    navigation.navigate ('profile', { profile : user })
+    navigation.navigate ('profile')
   }
   const navigateToNotification = () => {
-    navigation.navigate ('Notifications', { profile : user })
+    navigation.navigate ('Notifications')
   }
   
   const onFilterChange = (value) => {
     if (value.leftValue !== filter.leftValue) {
       setAccountMain(
-        DAccountMain.sort((a, b) => {
-          const aValue = parseFloat(a.initialBal.replaceAll(' B', ''));
-          const bValue = parseFloat(b.initialBal.replaceAll(' B', ''));
+        accountMain.sort((a, b) => {
+          //const aValue = parseFloat(a.initialAmountTTC.replaceAll(' B', ''));
+          //const bValue = parseFloat(b.initialAmountTTC.replaceAll(' B', ''));
+          const aValue = parseFloat(a.initialAmountTTC)
+          const bValue = parseFloat(b.initialAmountTTC)
+
           if (value.leftValue) {
             return bValue - aValue;
           } else {
@@ -185,7 +260,7 @@ const HomeScreen = () => {
     }
     if (value.centerValue !== filter.centerValue) {
       setAccountMain(
-        DAccountMain.sort((a, b) => {
+        accountMain.sort((a, b) => {
           const x = a.isUp;
           const y = b.isUp;
           if (value.centerValue) {
@@ -199,9 +274,11 @@ const HomeScreen = () => {
     }
     if (value.rightValue !== filter.rightValue) {
       setAccountMain(
-        DAccountMain.sort((a, b) => {
-          const aValue = parseFloat(a.currentBal.replaceAll('KX', ''));
-          const bValue = parseFloat(b.currentBal.replaceAll('KX', ''));
+        accountMain.sort((a, b) => {
+          //const aValue = parseFloat(a.balance.replaceAll('KX', ''))
+          //const bValue = parseFloat(b.balance.replaceAll('KX', ''))
+          const aValue = parseFloat(a.balance);
+          const bValue = parseFloat(b.balance);
           if (value.rightValue) {
             return bValue - aValue;
           } else {
@@ -227,9 +304,9 @@ const HomeScreen = () => {
         backgroundColor : colors.white
       }}
     >
-      <HeaderHome userName = {user} onPressLeft = {navigateToProfile} onPressRight={navigateToNotification}  />
+      <HeaderHome userName = {userToken?.auth_user?.firstName + ' ' + userToken?.auth_user?.lastName} onPressLeft = {navigateToProfile} onPressRight={navigateToNotification}  />
       <View style = {styles.container} >
-          <HeaderCard isPrimary isCenter title = "Solde Oracle " badge = {Balance[0].date} value = {"Md "+Balance[0].currentBal} onPress={() => {}} disabled/>
+          <HeaderCard isPrimary isCenter title = {balOracleTitle} badge = {Balance[0].date} value = {"Md "+balanceOracle} onPress={toggleBalOracle} />
           
           <View style={{ flexDirection: 'row', marginTop: 10 }}>
             <View style={{ flex: 1, paddingRight: 2 }}>
@@ -305,22 +382,22 @@ const HomeScreen = () => {
               onRefresh={() => {}}
             />
           }
-          data={AccountMain}
+          data={accountMain}
           keyExtractor={(_item, index) => index.toString()}
-          ListEmptyComponent={<Text> Pas de resultat </Text>}
+          ListEmptyComponent={({item}) => (<EmptyList  item = {item}/>)}
           renderItem={({ item: itemInline, index }) => (
             <Price2Col
               key={index}
               tagAct= {itemInline.tag }
               //image={itemInline.image}
-              code={itemInline.code}
+              code={itemInline.acctID}
               name={itemInline.name}
               usedBal={itemInline.usedBal}
-              initialBal={itemInline.initialBal}
-              percent={itemInline.percent} // consumption rate of Budget
-              currentBal={itemInline.currentBal}
+              initialBal={(itemInline.initialAmountTTC / Math.pow(10,6)).toFixed(2) + 'MX'}
+              percent={itemInline.percent?itemInline.percent : '10%'} // consumption rate of Budget
+              currentBal={'MX'+(itemInline.balance/ Math.pow(10,6)).toFixed(2)}
               isUp={itemInline.isUp}
-              statusAct={itemInline.status}
+              statusAct={itemInline.status.tag}
               onPress={() => {}}
             />
           )}

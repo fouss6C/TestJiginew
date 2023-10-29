@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import Button from '../../components/Button'
 import { Controller, useForm } from 'react-hook-form'
 import IconMaterial from 'react-native-vector-icons/MaterialCommunityIcons'
-import ActNumbers from '../../assets/data/AccountNumbersList'
+import actIDs from '../../assets/data/AccountNumbersList'
 import SearchModal from '../../components/SearchModal'
 import MonthYearPicker from '../../components/MonthlyYearPicker'
 import { Float } from 'react-native/Libraries/Types/CodegenTypes'
@@ -27,10 +27,10 @@ type formData = {
   amountTTC: string | Float
   amountHT : string | Float
   name: string
-  actNumber : string 
-  projectNumber : string 
+  actID : string 
+  projectID : string 
   type : string
-  description: string
+  motive: string
 }
 
 const ProjectFormScreen = () => {
@@ -40,26 +40,26 @@ const ProjectFormScreen = () => {
     const {control, handleSubmit , watch , reset , setValue } = useForm<formData>( { defaultValues : { amountTTC : 500000}})
     // choice item hooks
     const [typeSelected , setTypeSelected]=useState(ProjectTypes[0])
-    const [actNumberSelected , setActNumberSelected] = useState(ActNumbers[0])
+    const [actIDSelected , setactIDSelected] = useState(actIDs[0])
     //Modals visibility configs 
     const [typeModalVisible, setTypeModalVisible] = useState(false)
-    const [actNumberModalVisible, setActNumberModalVisible] = useState(false)
+    const [actIDModalVisible, setactIDModalVisible] = useState(false)
 
     const [optionChoosed, setOptionChoosed] = useState()
     const navigation = useNavigation();
     
     useEffect(()=> {
-        setValue('actNumber',actNumberSelected.tag)
-    } , [actNumberSelected])
+        setValue('actID',actIDSelected.tag)
+    } , [actIDSelected])
 
     // set func for hooks 
     const onTypeSelect = (option) => {
       setTypeSelected(option)
       setTypeModalVisible(false)
     }
-    const onActNumberSelect = (option) => {
-        setActNumberSelected(option)
-        setActNumberModalVisible(false)
+    const onactIDSelect = (option) => {
+        setactIDSelected(option)
+        setactIDModalVisible(false)
     }
     
 
@@ -67,13 +67,13 @@ const ProjectFormScreen = () => {
 
     }
 
-    const submitProjectForm = async ({amountTTC , amountHT ,  name , projectNumber , actNumber , description }: formData) => {
+    const submitProjectForm = async ({amountTTC , amountHT ,  name , projectID , actID , motive }: formData) => {
       if (loading) { return }
         setLoading(true)
       try {
        // const response = await Auth.signUp ({username , password , attributes : { name , email , phone_number}})
         //navigation.navigate('Confirm email', {username});
-        await console.log('this is parameter ', projectNumber + actNumber + name + amountTTC + amountHT + typeSelected.tag + actNumberSelected.tag)
+        await console.log('this is parameter ', projectID + actID + name + amountTTC + amountHT + typeSelected.tag + actIDSelected.tag)
       } catch ( e ) {
         Alert.alert ( " Erreur de creation : ", (e as Error ).message )
   
@@ -231,7 +231,7 @@ const ProjectFormScreen = () => {
               </Text>
               <Controller
                 control={control}
-                name='projectNumber'
+                name='projectID'
                 rules={{
                 }}
                 render={({
@@ -287,7 +287,7 @@ const ProjectFormScreen = () => {
               >
                     <Controller
                         control={control}
-                        name='actNumber'
+                        name='actID'
                         rules={{
                         }}
                         render={({
@@ -332,7 +332,7 @@ const ProjectFormScreen = () => {
                     />
                 <TouchableOpacity 
                     style={{ paddingLeft: 5 }} 
-                    onPress={() => setActNumberModalVisible(true)}
+                    onPress={() => setactIDModalVisible(true)}
                 >
                     <IconMaterial name="filter-menu-outline" size={24} color={colors.primary} />
                 </TouchableOpacity>
@@ -354,7 +354,7 @@ const ProjectFormScreen = () => {
               </Text>
               <Controller
                 control={control}
-                name='description'
+                name='motive'
                 rules={{
                 }}
                 render={({
@@ -378,7 +378,7 @@ const ProjectFormScreen = () => {
                         textAlignVertical="top"
                         multiline={true}
                         autoCorrect={false}
-                        placeholder={'Description du projet..'}
+                        placeholder={'motive du projet..'}
                         placeholderTextColor={colors.gray}
                         value={value as string }
                         selectionColor={colors.primary}
@@ -411,10 +411,10 @@ const ProjectFormScreen = () => {
           onSwipeComplete={() => setTypeModalVisible(false)}
         />
         <SearchModal
-            isVisible={actNumberModalVisible}
-            options={ActNumbers}
-            onChange = {onActNumberSelect}
-            onSwipeComplete={() => setActNumberModalVisible(false)}
+            isVisible={actIDModalVisible}
+            options={actIDs}
+            onChange = {onactIDSelect}
+            onSwipeComplete={() => setactIDModalVisible(false)}
         />
       </View>
     )

@@ -14,7 +14,6 @@ import colors from '../../theme/colors'
 import font from '../../theme/font'
 import SelectOptionModal from '../../components/SelectOptionModal'
 import SearchOptionModal from '../../components/SearchModal'
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import Button from '../../components/Button'
 import { Controller, useForm } from 'react-hook-form'
 import { Float } from 'react-native/Libraries/Types/CodegenTypes'
@@ -47,16 +46,16 @@ const DaFormScreen = () => {
 
     // set func for hooks 
     const onPrestationTypeSelect = (option) => {
-      setPrestationSelected(option);
-      setPrestationModalVisible(false);
+      setPrestationSelected(option)
+      setPrestationModalVisible(false)
     }
     const onProviderSelect = (option) => {
-      setProviderSelected(option);
-      setProviderModalVisible(false);
+      setProviderSelected(option)
+      setProviderModalVisible(false)
     }
     const onAccountSelect = (option) => {
-      setAccountSelected(option);
-      setAccountModalVisible(false);
+      setAccountSelected(option)
+      setAccountModalVisible(false)
     }
 
     const submitDaForm = async ({amountTTC , name , amountHT , motive }: formData) => {
@@ -65,7 +64,7 @@ const DaFormScreen = () => {
       try {
        // const response = await Auth.signUp ({username , password , attributes : { name , email , phone_number}})
         //navigation.navigate('Confirm email', {username});
-        console.log('this is parameter ', amountHT + name + amountTTC + motive + prestationSelected.tag + providerSelected.tag + accountSelected.tag )
+        await  console.log('this is parameter ', amountHT + name + amountTTC + motive + prestationSelected.tag + providerSelected.tag + accountSelected.tag )
       } catch ( e ) {
         Alert.alert ( " Erreur de creation : ", (e as Error ).message )
   
@@ -118,7 +117,7 @@ const DaFormScreen = () => {
                         textAlign = {'center'}
                         inputStyle={Typography.title2}
                         //placeholder='XOF Montant TTC'
-                        value={value}
+                        value={value as number}
                         onChange={onChange}
                         onBlur={onBlur}
                     />
@@ -204,7 +203,7 @@ const DaFormScreen = () => {
                       }}
                       styleText={{marginLeft : 'auto', }}
                       inputStyle={Typography.body2}
-                      placeholder='XOF Montant HT'
+                      //placeholder='XOF Montant HT'
                       value={value as number} 
                       onChange={onChange}
                     />
@@ -289,7 +288,7 @@ const DaFormScreen = () => {
                 )}
               /> 
             </View>
-              <View style={styles.viewImage}>
+              {/* <View style={styles.viewImage}>
                 <TouchableOpacity
                   style={[
                     styles.image,
@@ -305,7 +304,7 @@ const DaFormScreen = () => {
                   <Icon name="plus-circle" size={24} color={colors.primary} />
                   <Text subhead > Fichier Offre </Text>
                 </TouchableOpacity>
-              </View>
+              </View> */}
           </ScrollView>
           <Button
             style={{ marginHorizontal: 5, marginBottom: 20 ,marginTop : 1 }}

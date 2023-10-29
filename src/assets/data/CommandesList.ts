@@ -1,5 +1,7 @@
 
-// infos DA receuillies  a partir de daID 
+// infos DA receuillies  a partir de daID
+// DA_ID par DaNumber , et ajouter le prestationType dans bc 
+// 
 
 const Commandes = [
   {
@@ -10,19 +12,26 @@ const Commandes = [
     executionRate: 20, // realisation Rate 
     savingRate: 30 ,
     acceptanceRate: 40 ,
-    status: 'on_going', // status 
+    status: {
+      id : 2 , 
+      status : 'En cours', 
+      tag : 'ongoing'
+    },
     isUp:false ,  
     jalon : 'iT0', // jalon
-    members: [],
     bcNumber:'244444' ,  // bcNumber 
-    initialDeadline: '-120', //
+    initialDeadline: '12-08-2024', //
     createdAt:'12 Apr 2023',
     purchasedAt: '12 Apr 2023',
     createdBy : '11111', // user ID 
     createdByName: 'Jean Paul',
     createdByService: 'SICOV',
     createdByEmail: 'jeanpaul@orangemali.com',
-    providedBy : 'Huawei Technologies ',
+    providedBy : {
+      id : 1 ,
+      name : 'Huawei Technologies ',
+      tag : ' HUAWEI'
+    },
     assets: 'installation du maytos m & power on yuii soaiaio asoisoasi spopas pospoa aspospso asuiasus asiuisau asisius saiusius assasu ',
     nextStep: 'integration rx ',
     amountTTC: '367,839,839.90',
@@ -39,14 +48,21 @@ const Commandes = [
     executionRate: 30,
     savingRate: 30 ,
     acceptanceRate: 40 ,
-    status: 'on_going',
+    status:{
+      id : 2 , 
+      status : 'En cours', 
+      tag : 'ongoing'
+    },
     isUp:false , 
     jalon : 'iT1',
-    members: [],
     bcNumber:'222222',
     initialDeadline: '12 Apr 2023',
     createdAt:'12 Apr 2023',
-    providedBy : 'Huawei Technologies ',
+    providedBy : {
+      id : 1 ,
+      name : 'Huawei Technologies ',
+      tag : ' HUAWEI'
+    },
     purchasedAt: '12 Apr 2023',
     createdBy : '11111', // user ID 
     createdByName: 'Jean Paul',
@@ -69,14 +85,21 @@ const Commandes = [
     executionRate: 60,
     savingRate: 30 ,
     acceptanceRate: 40 ,
-    status: 'on_hold',
+    status:{
+      id : 2 , 
+      status : 'En cours', 
+      tag : 'onhold'
+    },
     isUp:false , 
     jalon : 'iT2',
-    members: [],
     bcNumber:'233333',
     initialDeadline: '12 Apr 2023',
     createdAt:'12 Apr 2023',
-    providedBy : 'Huawei Technologies ',
+    providedBy : {
+      id : 1 ,
+      name : 'Huawei Technologies ',
+      tag : ' HUAWEI'
+    },
     purchasedAt: '12 Apr 2023',
     createdBy : '11111', // user ID 
     createdByName: 'Jean Paul',
@@ -98,14 +121,21 @@ const Commandes = [
     executionRate: 90,
     savingRate: 30 ,
     acceptanceRate: 40 ,
-    status: 'completed',
+    status:{
+      id : 3 , 
+      status : 'Realisé', 
+      tag : 'completed'
+    },
     isUp:true , 
     jalon : 'iT3',
-    members: [],
     bcNumber:'211111',
     initialDeadline: '12 Apr 2023',
     createdAt:'12 Apr 2023',
-    providedBy : 'Huawei Technologies ',
+    providedBy : {
+      id : 1 ,
+      name : 'Huawei Technologies ',
+      tag : ' HUAWEI'
+    },
     purchasedAt: '12 Apr 2023',
     createdBy : '11111', // user ID 
     createdByName: 'Jean Paul',
@@ -128,14 +158,22 @@ const Commandes = [
     executionRate: 98,
     savingRate: 30 ,
     acceptanceRate: 40 ,
-    status: 'completed',
+    status: {
+      id : 3 , 
+      status : 'Realisé', 
+      tag : 'completed'
+    },
     isUp:true , 
     jalon : 'iT4',
-    members: [],
     bcNumber:'200000',
-    initialDeadline: '-120', // how many  
+    initialDeadline: '12-08-2024', // how many  
     createdAt:'12 Apr 2023',
-    providedBy : 'Huawei Technologies ',
+    providedBy : {
+      id : 1 ,
+      name : 'Huawei Technologies ',
+      tag : ' HUAWEI'
+    },
+    purchasedAt: '12 Apr 2023',
     createdBy : '11111', // user ID 
     createdByName: 'Jean Paul',
     createdByService: 'SICOV',

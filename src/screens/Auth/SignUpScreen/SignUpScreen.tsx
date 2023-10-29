@@ -1,5 +1,5 @@
 import { View, Text, Image, Alert , ScrollView , TouchableOpacity } from 'react-native'
-import React , { useState} from 'react'
+import React , { useEffect, useState} from 'react'
 import AuthBtn from '../../../components/auth/button/AuthBtn'
 import colors from '../../../theme/colors'
 import font from '../../../theme/font'
@@ -24,6 +24,8 @@ import Button from '../../../components/Button'
 import ListOptionSelected from '../../../components/ListOptionSelected'
 import SearchOptionModal from '../../../components/SearchModal'
 import GroupList from '../../../assets/data/GroupList'
+import { BaseURL } from '../../../assets/config/config'
+import axios from 'axios'
 const logo = "../../../assets/image/logo-hand.png"
 
 type signUpData = {
@@ -45,14 +47,43 @@ const SignUpScreen = () => {
     const [ groupSelected , setGroupSelected] = useState(GroupList[0])
     const [ groupModalVisible , setGroupModalVisible] = useState(false)
     //const [serviceGroup , setServiceGroup] = useState(ServiceGroup[0])
-
+    
     const onGroupSelect = (item)=> {
       setGroupSelected(item)
       setGroupModalVisible(false)
     }
 
     const SignUpSubmit = ({phoneNumber , email , firstName, lastName , password, passwordRepeat}: signUpData) => {
-      console.log( ' params : ' , phoneNumber + groupSelected.tag + password )
+      const response =  async () => {
+        let data = {
+          "email" : email,
+          "phone": phoneNumber , 
+          "firstName" : firstName,
+          "lastName" : lastName,
+          "password" : password,
+          "GroupID" : groupSelected.id 
+        }
+        await axios.post(`${BaseURL}/users/inscription`,data ,
+        {
+          headers: 
+          {'Content-Type': 'multipart/form-data'}
+        }
+      ).then(res => {
+          Alert.alert ( 'Veuillez valider votre demande de compte avec l\'administrateur..')
+        }).catch((error)=> {
+          if( error.code == 'ERR_BAD_REQUEST') {
+            //Alert.alert( 'No response from server , check the URL ..')
+            console.log(error.message)
+          } else {
+           // Alert.alert(error.message)
+           console.log(error.message)
+          }
+          console.log(error.code)
+        }).then( function () {
+          //
+        })
+      }
+      response()
     }
     const BackToWelcome = ()=>{
       navigation.navigate("Welcome")
@@ -75,8 +106,7 @@ const SignUpScreen = () => {
         <Image source = {require(logo)} style = {styles.imageLogo}/>
       </View>
        {/* form content data view  */}
-       <ScrollView showsVerticalScrollIndicator = { true } >
-       <View style = { styles.formContainer}>
+       <View style = {styles.formContainer}> 
        <FormInput
           name="firstName"
           placeholder="Prenom "
@@ -186,7 +216,6 @@ const SignUpScreen = () => {
           //primary
         />
         </View>
-        
         <Button 
           style = {styles.signupContainer}
           round 
@@ -195,8 +224,7 @@ const SignUpScreen = () => {
           Envoyer 
         </Button>
          {/*  <AuthBtn label = "Envoyer" onPress={handleSubmit(SignUpSubmit)} color= { colors.primary} /> */}
-       </View>
-       </ScrollView>
+         </View>
       <View style = { styles.tos }>
         <TextCustom footnote >
           Par Envoyer , vous <Text style = {{}}>acceptez</Text> par la même occasion 

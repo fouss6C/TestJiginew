@@ -10,7 +10,7 @@ export default StyleSheet.create({
     //marginVertical: 5,
     //backgroundColor: colors.gray,
     justifyContent: 'center',
-    padding: 5,
+   // padding: 2,
     flex : 1,
   },
   headerCardPrimary: {

@@ -11,9 +11,9 @@ const dmdSummary = [
     {
         name: 'Interne',
         description: 'Validation Interne',
-        tag : 'InternalApproval',
+        tag : 'InternalApproval', // levelOne  , lebelTwo , levelThree sont aussi comptés ici 
         population: 50,
-        color: colors.primary,
+        color: colors.primary,    // tu peux mettre le code couleur ici , 
         legendFontColor: '#7F7F7F',
     },
     {

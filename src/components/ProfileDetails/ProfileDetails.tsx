@@ -46,7 +46,7 @@ export default function ProfileDetail(props) {
       </View>
       {icon && (
         <View style={[styles.contentRight, styleRight]}>
-          <Icon name="angle-right" size={18} color={colors.gray} enableRTL={true} />
+          <Icon name="angle-right" size={18} color={colors.primary} enableRTL={true} />
         </View>
       )}
     </TouchableOpacity>

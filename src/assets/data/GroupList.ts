@@ -2,8 +2,8 @@
 const GroupNumbers = [
     {
         id: 1,
-        text : 'groupe division x',
-        tag: 'DIV123'
+        text : 'groupe division x', // group name 
+        tag: 'DIV123'             // groupID 
     },
     {
         id: 2,

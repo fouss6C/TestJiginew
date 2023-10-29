@@ -27,6 +27,12 @@ const Balance = [
       currentBal: '35,367',
       percent: '0,33%',
       isUp: false,
+      currentBalCapex: '20,367',
+      percentCapex: '13%',
+      isUpCapex: false,
+      currentBalOpex: '14,367',
+      percentOpex: '10%',
+      isUpOpex: false,
       date: '05 April 2023 14:00 ' // last updated 
     },
     {

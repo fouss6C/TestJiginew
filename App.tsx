@@ -11,7 +11,8 @@ import {
   View ,
   StyleSheet,
   Image,
-  ScrollView
+  ScrollView,
+  Platform
 } from 'react-native';
 import WelcomeScreen from './src/screens/Auth/WelcomeScreen/index'
 import LoginScreen from './src/screens/Auth/SignInScreen'
@@ -29,10 +30,12 @@ import HeaderCard from './src/components/Card/HeaderCard'
 import Transaction from './src/components/Transactions/Transaction'
 import TitleList from './src/components/TitleList';
 import PickerSelect from './src/components/PickerSelect';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AuthContextProvider from './src/screens/Context/AuthContextProvider';
+import SplashScreen from 'react-native-splash-screen';
 
 const Jiginew = () => {
+  
   return (
     <AuthContextProvider>
       <Navigation />

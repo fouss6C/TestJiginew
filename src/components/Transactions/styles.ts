@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native'
+import { Platform, StyleSheet } from 'react-native'
 import colors from '../../theme/colors'
 
 export default StyleSheet.create({
@@ -7,9 +7,14 @@ export default StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     height: 65,
-    borderBottomWidth : 0.5 , 
-    borderBottomColor: colors.border,
-    padding: 5,
+    //borderBottomWidth : 0.5 , 
+    //borderBottomColor: colors.border,
+    //borderWidth : 0.3 , 
+    borderRadius: 8,
+    padding: 3,
+    marginBottom : 5, 
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
   },
   image: {
     height: 36,

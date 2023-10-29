@@ -25,7 +25,7 @@ const Transaction = ({
         {/* <Icon name={icon} size={20} color={colors.white} solid /> */}
         <Text white headline> {initial}</Text>
       </View>
-      <View style={{ paddingLeft: 8, flex: 1 }}>
+      <View style={{ paddingLeft: 2, flex: 1 }}>
         <Text body2 semibold>{name}</Text>
         <View style = {{ flexDirection:'row',  top:5 }}>
           <Text footnote light
@@ -40,7 +40,7 @@ const Transaction = ({
       </View>
       <View>
         <Text  gray style= {[styles.text , {fontFamily : 'Roboto'} ]}>
-          {price}
+          { price }
         </Text>
         <Text overline green = {isUp} red = {!isUp} style={[styles.text, {marginTop: 5}]}>
           {status}

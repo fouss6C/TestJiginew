@@ -1,4 +1,4 @@
-import { View,  TouchableOpacity } from 'react-native'
+import { View,  TouchableOpacity, ActivityIndicator } from 'react-native'
 import React, { useContext, useEffect } from 'react'
 import { NavigationContainer, useNavigation } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
@@ -24,10 +24,35 @@ import AccountFormScreen from '../AccountFormScreen'
 import { AuthContext } from "../Context/AuthContextProvider"
 import BcEditScreen from '../BcFormScreen/BcEditScreen'
 import ProviderFormScreen from '../ProviderFormScreen'
+import SplashScreen from 'react-native-splash-screen'
+import colors from '../../theme/colors'
 
 const Stack = createNativeStackNavigator <RootStackNavigatorParamList> ()
 const NavigationRoot = () => {
     const { userToken } = useContext(AuthContext)
+    useEffect(()=> {
+        // if ( Platform.OS === 'android') {
+            const LoadingStatus = () => {
+                return (
+                    <>
+                    <ActivityIndicator 
+                        animating = {true}
+                        color = {colors.primary}
+                        size = "large"
+                        style = {{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: 80
+                        }}
+                    />
+                    </>
+                )
+               }
+           //LoadingStatus()
+           SplashScreen.hide();
+         //}
+       },[])
   return (
     <SafeAreaProvider>
         <NavigationContainer>

@@ -1,0 +1,1 @@
+UPDATE `bon_commande` SET `next_step`=  concat (`next_step`,' Next action is to integrate Hardware in the network... ' )  WHERE 1

@@ -54,8 +54,8 @@ const SignInScreen = () => {
         await axios.post(`${BaseURL}/login` , data ,{headers: {'Content-Type': 'multipart/form-data'}}
         ).then(res => {
             const Auth = res.data
-            setUserToken(Auth.access_token)
-            AsyncStorage.setItem('userToken' ,Auth.access_token)
+            setUserToken(Auth)
+            AsyncStorage.setItem('userToken' , JSON.stringify(Auth))
           }).catch((error)=> {
             if( error.code == 'ERR_BAD_REQUEST') {
               Alert.alert( 'Login ou mot de passe incorrect .. ')
@@ -92,8 +92,8 @@ const SignInScreen = () => {
           placeholder="@orangemali.com"
           control={control}
           rules={{
-            required: '@Email est requis ',
-            pattern: {value: EMAIL_REGEX, message: '@Email est invalide'},
+            //required: '@Email est requis ',
+            //pattern: {value: EMAIL_REGEX, message: '@Email est invalide'},
           }}
         />
         <FormInput

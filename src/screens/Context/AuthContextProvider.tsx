@@ -1,13 +1,18 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { createContext, useState , ReactNode , Dispatch, SetStateAction, useContext, useEffect } from "react"
 
-type userType  = string | undefined | null
+type authObject = {
+  access_token : string 
+  auth_user : object
+  refresh_token : string
+}
+type userType  = authObject | undefined | null
 
- type AuthType = {
+type AuthType = {
   userToken : userType,
   setUserToken : Dispatch<React.SetStateAction<userType>>
- }
- export const AuthContext = createContext <AuthType>( {
+}
+export const AuthContext = createContext <AuthType>( {
   userToken : undefined , 
   setUserToken : () => {}
 } )
@@ -17,8 +22,8 @@ const AuthContextProvider = ( { children } : { children : ReactNode }) => {
     useEffect(()=> {
         const checkUser = async() => {
             try {
-                const userToken = await  AsyncStorage.getItem('userToken')
-                setUserToken (userToken)
+                const JsonUser = await  AsyncStorage.getItem('userToken')
+                setUserToken (JSON.parse (JsonUser))
             } catch  ( e ) {
                 setUserToken ( null )
             }
@@ -27,7 +32,7 @@ const AuthContextProvider = ( { children } : { children : ReactNode }) => {
     }, [])
   
   return (
-    <AuthContext.Provider value = { {userToken , setUserToken} }>
+    <AuthContext.Provider value = { {userToken , setUserToken}  }>
       { children }
     </AuthContext.Provider>
   )

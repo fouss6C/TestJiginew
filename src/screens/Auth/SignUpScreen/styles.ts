@@ -88,7 +88,7 @@ const Styles = StyleSheet.create({
     formContainer: {
       width: '100%',
       alignItems: 'center',
-      flex : 1 
+      flex : 1
     },
 
     addButton: {

@@ -31,7 +31,6 @@ type formData = {
   bcType : string
   provider : string
   description: string
-  notifcationUrl : string
 }
 
 const BcFormScreen = () => {
@@ -126,7 +125,7 @@ const BcFormScreen = () => {
                         textAlign = {'center'}
                         inputStyle={Typography.title2}
                         //placeholder='XOF Montant TTC'
-                        value={value}
+                        value={value as number }
                         onChange={onChange}
                         onBlur={onBlur}
                     />

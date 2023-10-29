@@ -23,7 +23,6 @@ import SearchModal from '../../components/SearchModal'
 import MonthYearPicker from '../../components/MonthlyYearPicker'
 import { Float } from 'react-native/Libraries/Types/CodegenTypes'
 
-
 type formData = {
     amountTTC: string | Float
     name: string
@@ -36,36 +35,50 @@ type formData = {
     motive : string
     nextStep: string
     assets: string
-    executionRate: string 
-    savingRate: string 
-    acceptanceRate: string
+    executionRate: number 
+    savingRate: number 
+    acceptanceRate: number
     status: string 
     jalon: string 
-    deadline: string
-    //notifcationUrl : string
+    //deadline: string
+    //notification : string
 }
 
 const BcEditScreen = () => {
     const insets = useSafeAreaInsets()
     const [loading, setLoading] = useState(false)
     const route = useRoute()
+    const [item , setItem] = useState(route?.params?.item)
+    
     // input item hooks 
-    const {control, handleSubmit , watch , reset , setValue } = useForm<formData>( { defaultValues : { amountTTC : 500000}})
+    const {control, handleSubmit , watch , reset , setValue } = useForm<formData>( { 
+      defaultValues : { 
+        amountTTC : item.amountTTC , 
+        name : item.title, 
+        bcNumber : item.bcNumber,
+        daNumber : item.daNumber,
+        assets : item.assets ,
+        motive : item.description ,
+        nextStep : item.nextStep,
+        executionRate : item.executionRate.toString() , 
+        savingRate : item.savingRate.toString() ,
+        acceptanceRate : item.acceptanceRate.toString() , 
+        jalon : item.jalon,
+      }})
     // choice item hooks
     const [bcTypeSelected , setBcTypeSelected]=useState(bcTypes[0])
-    const [bcStatusSelected , setBcStatusSelected]=useState(bcTypes[0])
-    const [providerSelected , setProviderSelected] = useState(providers[0])
+    const [bcStatusSelected , setBcStatusSelected]=useState(item.status)
+    const [providerSelected , setProviderSelected] = useState(item.providedBy)
     const [daNumberSelected , setDaNumberSelected] = useState(DaNumbers[0])
-    const [ deadline  , setDeadline ] = useState('')
-    const [ notification , setNotification] = useState()
+    const [ deadline  , setDeadline ] = useState(item.initialDeadline)
+    const [ notification , setNotification] = useState(item.purchasedAt)
     //Modals visibility configs 
     const [bcTypeModalVisible, setBcTypeModalVisible] = useState(false)
     const [bcStatusModalVisible, setBcStatusModalVisible] = useState(false)
     const [providerModalVisible, setProviderModalVisible] = useState(false)
     const [daNumberModalVisible, setDaNumberModalVisible] = useState(false)
-
-    const [optionChoosed, setOptionChoosed] = useState()
-    const navigation = useNavigation();
+    const navigation = useNavigation()
+    
     
     useEffect(()=> {
         setValue('daNumber',daNumberSelected.tag)
@@ -73,8 +86,9 @@ const BcEditScreen = () => {
 
     useEffect(() => {
       if (route?.params?.item) {
-        //setItem(route?.params?.item)
-        navigation.setOptions({headerTitle :'BC '+ route?.params?.item})
+        setItem(route?.params?.item)
+        console.log ( item )
+        navigation.setOptions({headerTitle :'BC '+ route?.params?.item.bcNumber})
       }
   }, [route?.params?.item])
 
@@ -95,19 +109,18 @@ const BcEditScreen = () => {
         setDaNumberSelected(option)
         setDaNumberModalVisible(false)
     }
-    
 
-    const goDaSearchScreen = () => {
-
-    }
-
-    const submitBcForm = async ({amountTTC , name , bcNumber , daNumber , motive }: formData) => {
+    const submitBcForm = async ({ amountTTC , name , bcNumber , daNumber , motive , nextStep , executionRate , savingRate, acceptanceRate , jalon , assets }: formData) => {
       if (loading) { return }
         setLoading(true)
       try {
-       // const response = await Auth.signUp ({username , password , attributes : { name , email , phone_number}})
-        //navigation.navigate('Confirm email', {username});
-        await console.log('this is parameter ', bcNumber + daNumber + name + motive  +amountTTC + deadline + notification+ bcTypeSelected.tag + providerSelected.tag , daNumberSelected.tag)
+        await console.log('this is parameter ', executionRate + 
+        savingRate + acceptanceRate + 
+        bcNumber + daNumber + name + 
+        jalon +  motive  + amountTTC + 
+        deadline + notification + bcTypeSelected.tag + 
+        providerSelected.tag , daNumberSelected.tag + nextStep +
+         assets  )
       } catch ( e ) {
         Alert.alert ( " Erreur de creation : ", (e as Error ).message )
   
@@ -159,9 +172,10 @@ const BcEditScreen = () => {
                         textAlign = {'center'}
                         inputStyle={Typography.title2}
                         //placeholder='XOF Montant TTC'
-                        value={value}
+                        value={value }
                         onChange={onChange}
                         onBlur={onBlur}
+                        defaultValue = { item.amountTTC}
                     />
                       {error && (
                         <Text style={{}}>
@@ -564,6 +578,55 @@ const BcEditScreen = () => {
                         autoCorrect={false}
                         placeholder={'98' + '%'}
                         placeholderTextColor={colors.gray}
+                        value={value as number}
+                        onBlur={onBlur}
+                        selectionColor={colors.primary}
+                        numberOfLines={1}
+                        //minLength = { 5 }
+                        maxLength = { 2 }
+                        keyboardType = "numeric"
+                    />
+                      {error && (
+                        <Text style={{}}>
+                          {error.message || "Error"}
+                        </Text>
+                      )} 
+                  </>
+                )}
+              /> 
+              </View>
+              <View style = {{ marginTop : 10}}>
+              <Text body1 primary >
+                Jalon ( iTx )
+              </Text>
+              <Controller
+                control={control}
+                name='jalon'
+                rules={{
+                }}
+                render={({
+                  field: { value, onChange, onBlur },
+                  fieldState: { error },
+                }) => (
+                  <>
+                    <TextInput
+                        style={{
+                          marginTop: 2,
+                          height: 'auto',
+                          paddingVertical: 5,
+                          fontSize: font.size.s,
+                          borderWidth : 0.3,
+                          borderColor : colors.border,
+                          borderRadius : 1,
+                        }}
+                        inputStyle={Typography.body1}
+                        //minHeight={120}
+                        onChangeText={onChange}
+                        textAlignVertical="top"
+                        multiline={true}
+                        autoCorrect={false}
+                        placeholder={'it0'}
+                        placeholderTextColor={colors.gray}
                         value={value as string}
                         onBlur={onBlur}
                         selectionColor={colors.primary}
@@ -584,9 +647,9 @@ const BcEditScreen = () => {
               <ListOptionSelected
                 style={{ marginTop: 10 }}
                 textLeft={'Statut BC'}
-                textRight={bcTypeSelected?.text}
+                textRight={bcStatusSelected?.text||bcStatusSelected?.status}
                 onPress={() =>{
-                  setBcTypeModalVisible(true)
+                  setBcStatusModalVisible(true)
                 }}
                 primary
               />
@@ -602,7 +665,7 @@ const BcEditScreen = () => {
               <ListOptionSelected
                 style={{ marginTop: 10 }}
                 textLeft={'Fournisseur'}
-                textRight={providerSelected?.text}
+                textRight={providerSelected?.text || providerSelected?.name}
                 onPress={() =>
                   setProviderModalVisible(true)
                 }
@@ -663,7 +726,7 @@ const BcEditScreen = () => {
                 )}
               /> 
             </View>
-              <View style={styles.viewImage}>
+              {/* <View style={styles.viewImage}>
                 <TouchableOpacity
                   style={[
                     styles.image,
@@ -679,7 +742,7 @@ const BcEditScreen = () => {
                   <Icon name="plus-circle" size={24} color={colors.primary} />
                   <Text subhead > Fichier BC </Text>
                 </TouchableOpacity>
-              </View>
+              </View> */}
           </ScrollView>
           <Button
             style={{ marginHorizontal: 5, marginVertical: 20 }}

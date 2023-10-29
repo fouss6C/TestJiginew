@@ -1,6 +1,5 @@
 import colors from '../../theme/colors'
-
-// text  for Status Tag value on  DA status Table
+// text  for Status Tag value on  BC status Table
 
 const bcStatus = [
     {
@@ -18,11 +17,11 @@ const bcStatus = [
       text : 'En suspens'
     },
     {
-        id: 3,
-        iconName: 'minus-circle',
-        iconColor: colors.secondary,
-        tag: 'completed',
-        text : 'Realisé'
+      id: 3,
+      iconName: 'minus-circle',
+      iconColor: colors.secondary,
+      tag: 'completed',
+      text : 'Realisé'
     },
 ]
 export default bcStatus

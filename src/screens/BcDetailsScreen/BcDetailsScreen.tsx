@@ -17,13 +17,17 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 type detailsType = {
     id: number
-    title: string 
-    description: string 
+    name: string 
+    context: string 
     days: string
-    executionRate: number
+    executionRate: number 
     savingRate: number
     acceptanceRate: number
-    status: string 
+    status : {
+      id : number 
+      status : string
+      tag : string 
+    } 
     isUp:boolean 
     jalon : string 
     bcNumber: string 
@@ -34,7 +38,11 @@ type detailsType = {
     createdByName: string 
     createdByService: string 
     createdByEmail: string 
-    providedBy : string 
+    providedBy : {
+      id : number
+      name : string
+      tag : string 
+    }
     assets: string 
     nextStep: string 
     amountTTC: string
@@ -50,19 +58,19 @@ const BcDetailsScreen = () => {
     const [modifyLoading, setModifyLoading] = useState(false)
     const navigation = useNavigation()
     const route = useRoute()
-    const [item, setItem] = useState<detailsType>({})
+    const [item, setItem] = useState<detailsType>(route?.params?.item)
     const [statusSelected , setStatusSelected] = useState('')
     const [statusModalVisible , setStatusModalVisible] = useState(false)
 
     useEffect(() => {
         if (route?.params?.item) {
           setItem(route?.params?.item)
-          navigation.setOptions({headerTitle :'BC '+ route?.params?.item.bcNumber })
+          navigation.setOptions({headername :'BC '+ route?.params?.item.bcNumber })
         }
     }, [route?.params?.item])
 
     const navigateToBcEdit = () => {
-      navigation.navigate('BcEdit' , { item : route?.params?.item.bcNumber })
+      navigation.navigate('BcEdit' , { item : route?.params?.item })
     }
 
     const onBcStatusSelect = (option) => {
@@ -105,7 +113,7 @@ const BcDetailsScreen = () => {
                     </Text>
                 </Text>
               <Text title3 style={{ marginTop: 20 }}>
-                {item.title}
+                {item.name}
               </Text>
             </View>
             {/* initial info of the owner */}
@@ -114,7 +122,7 @@ const BcDetailsScreen = () => {
             </TouchableOpacity>
           </View>
           <Text body2>
-            {item.description}
+            {item.context}
           </Text>
           <Text subhead gray style={{ marginTop: 15 , marginLeft : 'auto' }} >
             notifié le {item.createdAt}
@@ -225,13 +233,13 @@ const BcDetailsScreen = () => {
               }}
             >
               <LabelUpper2Row style={{ flex: 1 }} label={'Jalon'} value={item.jalon + ' (' + item.days+ ' Jours )'} />
-              <LabelUpper2Row style={{ flex: 1 }} label={'Statut'} value={item.status} />
+              <LabelUpper2Row style={{ flex: 1 }} label={'Statut'} value={item.status.status} />
             </View>
           </View>
           <Text title3>{'Annexes'}</Text>
-          <ListMenuIcon style={{ paddingTop: 20 }} icon={'add-business'} iconColor = {colors.primary}  title={item.providedBy} />
-          <ListMenuIcon style={{ paddingVertical: 10 }} icon={'history'} iconColor = {colors.primary} title={'Voir historique des realisations'} />
-          <ListMenuIcon style={{ paddingVertical: 10 }} icon={'upload-file'} iconColor = {colors.primary} title={'Voir document projets'} />
+          <ListMenuIcon style={{ paddingTop: 20 }} icon={'add-business'} iconColor = {colors.primary}  name={item.providedBy.name} />
+          <ListMenuIcon style={{ paddingVertical: 10 }} icon={'history'} iconColor = {colors.primary} name={'Voir historique des realisations'} />
+          <ListMenuIcon style={{ paddingVertical: 10 }} icon={'upload-file'} iconColor = {colors.primary} name={'Voir document projets'} />
         </ScrollView>
       </View>
       <View style = {{ flexDirection : 'row' ,  marginVertical: 20 }}>
