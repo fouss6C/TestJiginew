@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
-import { TouchableOpacity, View, FlatList, RefreshControl } from 'react-native'
+import { TouchableOpacity, View, FlatList, RefreshControl, ActivityIndicator } from 'react-native'
 import Modal from 'react-native-modal'
 import colors from '../../theme/colors'
 import Text from '../../components/Text'
@@ -18,7 +18,6 @@ const SearchOptionModal = (props) => {
   const [refreshing] = useState(false)
   const insets = useSafeAreaInsets()
 
-
   const onSaveCategory = ( option ) => {
     onChange(option)
   }
@@ -33,7 +32,7 @@ const SearchOptionModal = (props) => {
       setCategories(options)
     }
   }
-  
+
   return (
     <Modal swipeDirection={['down']} style={styles.bottomModal} {...attrs}>
       <View style={[
@@ -67,7 +66,8 @@ const SearchOptionModal = (props) => {
               }
           />
           </View>
-            <FlatList
+          { categories.length > 0  ? 
+            (<FlatList
               contentContainerStyle={{}}
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={true}
@@ -79,7 +79,12 @@ const SearchOptionModal = (props) => {
                   onRefresh={() => {}}
                 />
               }
-              ListEmptyComponent={({item}) => (<EmptyList  item = {category}/>) }
+              ListEmptyComponent={({item}) => 
+
+              (<EmptyList  item = {category}/>)
+              // category ? (<EmptyList  item = {category}/>) : (<ActivityIndicator animating={true} color={colors.primary} />)
+              
+            }
               data={categories}
               keyExtractor= {(item) => item.id}
               renderItem={({ item , index }) => (
@@ -103,7 +108,12 @@ const SearchOptionModal = (props) => {
                   </TouchableOpacity>
                 </>
               )}
-            />
+            />)
+            : 
+            (
+              <ActivityIndicator animating={true} color={colors.primary} />
+            )
+          }
         </View>
       </View>
     </Modal>

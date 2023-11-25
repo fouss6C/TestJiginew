@@ -13,6 +13,7 @@ export default StyleSheet.create({
     borderRadius: 8,
     padding: 3,
     marginBottom : 5, 
+    //marginHorizontal : 2 , 
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
   },

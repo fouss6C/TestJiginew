@@ -51,15 +51,15 @@ const ProfileScreen = (props) => {
               <ProfileDetail
                // image={userData.image}
                 textFirst={userToken?.auth_user.firstName + ' '  + userToken?.auth_user.lastName}
-                point={'N+'+ userToken?.auth_user.groupID.hierarchy}
+                point={'N+'+ userToken?.auth_user.group.hierarchy}
                 textSecond={userToken?.auth_user.email}
-                textThird={userToken?.auth_user.matricule}
+                textThird={'Mat '+ userToken?.auth_user.matricule}
                 onPress={() => {}}
               />
               <View style={styles.viewFollow}>
                 <View style={{ flex: 3 }}>
                   <Tag outline style={styles.follow}>
-                    {userToken?.auth_user.groupID.name}
+                    {userToken?.auth_user.group.name}
                   </Tag>
                 </View>
 

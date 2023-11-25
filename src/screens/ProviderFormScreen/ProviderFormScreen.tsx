@@ -1,4 +1,4 @@
-import { View,  ScrollView, TouchableOpacity, Alert } from 'react-native'
+import { View,  ScrollView, TouchableOpacity, Alert, KeyboardAvoidingView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TextInputMoney from '../../components/TextInputMoney'

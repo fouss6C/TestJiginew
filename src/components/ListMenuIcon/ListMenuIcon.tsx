@@ -12,7 +12,7 @@ export default function ListMenuIcon(props) {
   return (
     <TouchableOpacity style={[styles.contain, { borderColor: colors.border }, style]} onPress={onPress}>
       <Icon name={icon} size={24} solid color={iconColor?iconColor : colors.primary} />
-      <Text body1 style={{ flex: 1, paddingLeft: 10 }}>
+      <Text body1  style={{ flex: 1, paddingLeft: 10 }}>
         {title}
       </Text>
       <Icon name="chevron-right" size={24} solid color={iconColor?iconColor : colors.primary} />

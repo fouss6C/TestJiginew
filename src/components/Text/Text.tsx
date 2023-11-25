@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text , View, ViewProps } from 'react-native';
+import { Platform, StyleSheet, Text , View, ViewProps } from 'react-native';
 import PropTypes from 'prop-types';
 import { BaseStyle, Typography} from '../../theme'
 import font from '../../theme/font'
@@ -93,6 +93,7 @@ const Index = (props) =>  {
   if (textStyle.fontFamily) {
     const fontStyle = textStyle.fontStyle === 'italic' ? 'Italic' : '';
     const fontWeight = textStyle?.fontWeight ?? 400;
+  
     switch (textStyle.fontFamily) {
       case 'Raleway':
         textStyle.fontFamily = `${textStyle.fontFamily}-${

@@ -1,5 +1,5 @@
-import { View, FlatList, TouchableOpacity, RefreshControl, Alert,  } from 'react-native'
-import React , { useState } from 'react'
+import { View, FlatList, TouchableOpacity, RefreshControl, Alert, ActivityIndicator } from 'react-native'
+import React , { useContext, useEffect, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import ProjectLine from '../../assets/data/ProjectsLine'
 import  TextInput  from '../../components/TextInput'
@@ -17,6 +17,9 @@ import SearchOptionModal from '../../components/SearchModal'
 import TabTag from '../../components/TabTag'
 import EmptyList from '../../components/EmptyList'
 import { RootNavigationProp } from '../../types/Navigation'
+import axios from 'axios'
+import { BaseURL } from '../../assets/config/config'
+import { AuthContext } from '../Context/AuthContextProvider'
 
 const tabs = [
   {
@@ -39,20 +42,139 @@ const tabs = [
 
 const AccountScreen = () => {
   const insets = useSafeAreaInsets()
+  const { userToken } =useContext(AuthContext)
   const [refreshing] = useState(false)
+  const [projectLine , setProjectLine ] = useState([])
   const [category, setCategory] = useState('')
-  const [categories, setCategories] = useState(ProjectLine)
+  const [categories, setCategories] = useState([])
   const navigation = useNavigation<RootNavigationProp>()
   // filter hooks 
-  /* const [actStatus] = useState(ActStatus)
-  const [actID] = useState(ActID)
-  const [actOwner] = useState(ActOwner) */
+
+  const [actID , setActID ] = useState([])
+  const [group , setGroup] = useState([])
+  const [loadingAcct , setLoadingAcct] = useState(true)
+  const [loadingGroup , setLoadingGroup] = useState(true)
 
   const [actModalVisible , setActModalVisible]=useState(false)
   const [typeModalVisible , setTypeModalVisible]=useState(false)
   const [ownerModalVisible , setOwnerModalVisible]=useState(false)
 
   const [tab, setTab] = useState(tabs[0])
+
+  useEffect( () => {
+    const response = async () => {
+      await axios.get(`${BaseURL}/projets`,
+    { headers: {
+      //'Content-Type': 'multipart/form-data' , 
+      'Authorization' : `Bearer ${userToken?.access_token}`,
+      'Accept' : 'application/json'
+    }}
+    ).then(res => {
+        console.log (res.data)
+        setProjectLine(res.data)
+        setCategories(res.data)
+      }).catch((error)=> {
+        if( error.code == 'ERR_BAD_REQUEST') {
+          //Alert.alert( 'No response from server , check the URL ..')
+          console.log(error.message)
+        } else {
+         // Alert.alert(error.message)
+         console.log(error.message)
+        }
+        console.log(error.code)
+      }).then( function () {
+        //
+      })
+    }
+    response()
+  }, [])
+
+  useEffect( () => {
+    const response = async () => {
+      await axios.get(`${BaseURL}/groupes`,
+    { headers: {
+      //'Content-Type': 'multipart/form-data' , 
+      'Authorization' : `Bearer ${userToken?.access_token}`,
+      'Accept' : 'application/json'
+    }}
+    ).then(res => {
+        console.log (res.data)
+        const formatGroupList = () => {
+          return res.data.map((item) => 
+            {
+              let x = { 
+                  id : item.id,
+                  iconName: item.id ==1 ? 'plus-circle' : 'minus-circle' ,
+                  iconColor: item.id < 4 ? colors.primary : colors.secondary,
+                  tag : item.groupID, 
+                  text : item.name, 
+                  description : item.tag,
+              }
+              return x
+            }
+          )
+        }
+        setGroup(formatGroupList)
+        setLoadingGroup(false)
+      }).catch((error)=> {
+        if( error.code == 'ERR_BAD_REQUEST') {
+          //Alert.alert( 'No response from server , check the URL ..')
+          console.log(error.message)
+        } else {
+         // Alert.alert(error.message)
+         console.log(error.message)
+        }
+        console.log(error.code)
+      }).then( function () {
+        //
+      })
+    }
+    response()
+  }, [])
+
+  useEffect( () => {
+    const response = async () => {
+      await axios.get(`${BaseURL}/accounts/accountIDs`,
+    { headers: {
+      //'Content-Type': 'multipart/form-data' , 
+      'Authorization' : `Bearer ${userToken?.access_token}`,
+      'Accept' : 'application/json'
+    }}
+    ).then(res => {
+        console.log (res.data)
+        const formatProjectList = () => {
+          return res.data.map((item) => 
+            {
+              let x = { 
+                id : item.id,
+                iconName: item.id ==1 ? 'plus-circle' : 'minus-circle' ,
+                iconColor: colors.primary,
+                tag : item.acctID, 
+                text : item.name, 
+                description : '',
+              }
+              return x
+            }
+          )
+        }
+        setActID(formatProjectList)
+        setLoadingAcct(false)
+
+      }).catch((error)=> {
+        if( error.code == 'ERR_BAD_REQUEST') {
+          //Alert.alert( 'No response from server , check the URL ..')
+          console.log(error.message)
+        } else {
+         // Alert.alert(error.message)
+         console.log(error.message)
+        }
+      }
+      ).then( function () {
+        //
+      })
+    }
+    response()
+  }, [])
   
   const onAccountSelect = (option) => {
     //setActID(option)
@@ -72,18 +194,19 @@ const AccountScreen = () => {
 
   const navigateToDetails = (option) => {
 
-    navigation.navigate('AccountDetails' , { item : option})
+    navigation.navigate('AccountDetails', { item : option})
   }
 
   const filterCategory = (text) => {
     setCategory(text)
     if (text) {
-      setCategories(ProjectLine.filter((item) => 
-      haveChildren(item.name, text) || haveChildren(item.typeAct, text)|| 
-      haveChildren(item.codeAct, text) || haveChildren(item.projectID, text)
+      setCategories(projectLine.filter((item) => 
+      haveChildren(item.name, text) || haveChildren(item.type, text)|| 
+      haveChildren(item.acctID, text) || haveChildren(item.projectNumber, text)
+      || haveChildren(item.group.tag, text)
       ))
     } else {
-      setCategories(ProjectLine)
+      setCategories(projectLine)
       setTab(tabs[0])
     }
   }
@@ -161,51 +284,72 @@ const AccountScreen = () => {
                 }
                 data={categories}
                 keyExtractor={(_item, index) => index.toString()}
-                ListEmptyComponent={({item}) => (<EmptyList  item = {category}/>) }
+                ListEmptyComponent={({item}) => 
+                category ? (<EmptyList  item = {category}/>) : 
+                (<ActivityIndicator animating={true} color={colors.primary} />)
+              }
                 renderItem={({ item: itemInline, index }) => (
                     <Price2Col
-                        key={index}
-                        tagAct= {itemInline.tagAct }
-                        //image={itemInline.image}
-                        code={itemInline.projectID}
-                        name={itemInline.name}
-                        usedBal={itemInline.usedBal}
-                        initialBal={itemInline.initialBal}
-                        percent={itemInline.percent} // consumption rate of Budget
-                        currentBal={itemInline.currentBal}
-                        isUp={itemInline.isUp}
-                        statusAct={itemInline.statusAct}
-                        transactionType= {itemInline.transactionType}
-                        transactionAmount= { itemInline.transactionAmount}
-                        transactionDate= {  itemInline.transactionDate}
-                        transactionOperator= { itemInline.transactionOperator}
-                        transactionActOwner= { itemInline.owner}
-                        transactionAct= { itemInline.codeAct}
-                        //onPress={() => {}}
-                        onPressDetails = { () => {navigateToDetails(itemInline)}}
+                      key={index}
+                      tagAct= {itemInline.group.tag }
+                      //image={itemInline.image}
+                      code={itemInline.projectNumber}
+                      name={itemInline.name}
+                      usedBal={(itemInline.amountTTC - itemInline.balance) +''}
+                      initialBal={(itemInline.amountTTC / Math.pow(10,6)).toFixed(2) + 'MX'}
+                      percent={ (Math.abs(itemInline.amountTTC - itemInline.balance) * 100 / itemInline.amountTTC).toFixed(2) + '%' } // consumption rate of Budget
+                      currentBal={'MX'+ (itemInline.balance / Math.pow(10,6)).toFixed(2)}
+                      isUp={itemInline.balance >= itemInline.amountTTC ? true : false }
+                      statusAct={''}
+                      transactionType= { itemInline.transferts[0]?.type }
+                      transactionAmount= { itemInline.transferts[0]?.amount}
+                      transactionDate= {"2023-03-20 00:00"}
+                      transactionOperator= { itemInline.transferts[0]?.createdBy } 
+                      transactionActOwner= { itemInline.group.name}
+                      transactionAct= {'20002'}
+                      //onPress={() => {}}
+                      onPressDetails = { () => {navigateToDetails(itemInline)}}
                     />
                 )}
             />
         
         </View>
       </View>
-      <SearchOptionModal
+      {
+        !loadingAcct ?
+        (
+        <SearchOptionModal
           isVisible={actModalVisible}
-          options={ActID}
+          options={actID}
           onChange = {onAccountSelect}
           onSwipeComplete={() => setActModalVisible(false)}
-      />
+        />
+        ) : 
+        (
+          <>
+          </>
+        )
+      }
+      {
+        !loadingGroup ?
+        (
+          <SearchOptionModal
+            isVisible={ownerModalVisible}
+            options={group}
+            onChange = {onOwnerSelect}
+            onSwipeComplete={() => setOwnerModalVisible(false)}
+          />
+        ) :
+        (
+          <>
+          </>
+        )
+      }
       <SelectOptionModal
-          isVisible={typeModalVisible}
-          options={ActType}
-          onChange = {onTypeSelect}
-          onSwipeComplete={() => setTypeModalVisible(false)}
-      />
-      <SearchOptionModal
-          isVisible={ownerModalVisible}
-          options={ActOwner}
-          onChange = {onOwnerSelect}
-          onSwipeComplete={() => setOwnerModalVisible(false)}
+        isVisible={typeModalVisible}
+        options={ActType}
+        onChange = {onTypeSelect}
+        onSwipeComplete={() => setTypeModalVisible(false)}
       />
     </View>
   )

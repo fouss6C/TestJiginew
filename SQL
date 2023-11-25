@@ -1,1 +1,7 @@
 UPDATE `bon_commande` SET `next_step`=  concat (`next_step`,' Next action is to integrate Hardware in the network... ' )  WHERE 1
+
+UPDATE `demande_achat` SET `prestation_type` = "Fournitures"  WHERE  id <=3;
+UPDATE `demande_achat` SET `prestation_type` = "Services"  WHERE  id > 3 and id <=5;
+UPDATE `demande_achat` SET `prestation_type` = "Fournitures&Services"  WHERE  id > 5;
+UPDATE `projet` SET `amountht`=300000000,`amountttc`=350000000,`balance`=350000000,`transfert_in`=0,`transfert_out`=1500000,`motivation`='Motivation xyz' WHERE 1
+

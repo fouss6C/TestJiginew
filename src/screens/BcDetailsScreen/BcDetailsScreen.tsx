@@ -65,9 +65,22 @@ const BcDetailsScreen = () => {
     useEffect(() => {
         if (route?.params?.item) {
           setItem(route?.params?.item)
-          navigation.setOptions({headername :'BC '+ route?.params?.item.bcNumber })
+          navigation.setOptions({headerTitle :'BC '+ route?.params?.item.bcNumber })
         }
     }, [route?.params?.item])
+
+    const formatDate = (date) => {
+      let d = new Date(date),
+          month = '' + (d.getMonth() + 1),
+          day = '' + d.getDate(),
+          year = d.getFullYear();
+  
+      if (month.length < 2)
+          month = '0' + month;
+      if (day.length < 2) 
+          day = '0' + day;
+      return [year, month, day].join('-');
+    }
 
     const navigateToBcEdit = () => {
       navigation.navigate('BcEdit' , { item : route?.params?.item })
@@ -109,7 +122,7 @@ const BcDetailsScreen = () => {
           >
             <View style={{ flex: 1 }}>
                 <Text title2 style ={{fontFamily : 'Roboto'}}>{'BC'+ item.bcNumber } 
-                    <Text subhead gray> {'#'+item.createdByService } 
+                    <Text subhead gray> {'#'+item.createdBy?.group.name } 
                     </Text>
                 </Text>
               <Text title3 style={{ marginTop: 20 }}>
@@ -118,14 +131,14 @@ const BcDetailsScreen = () => {
             </View>
             {/* initial info of the owner */}
             <TouchableOpacity  style={{ alignItems: 'center', justifyContent:'center' , borderRadius : 20 , backgroundColor: DachatsInfo.isUp? colors.green : colors.primary,  width: 40, height: 40 }} >
-                <Text headline1 white style={{ transform: [{ rotate: "315deg" }] }} > {'NP'} </Text>
+                <Text headline1 white style={{ transform: [{ rotate: "315deg" }] }} > {item.createdBy.tag} </Text>
             </TouchableOpacity>
           </View>
           <Text body2>
             {item.context}
           </Text>
           <Text subhead gray style={{ marginTop: 15 , marginLeft : 'auto' }} >
-            notifié le {item.createdAt}
+            notifié le {formatDate (item.createdAt) }
           </Text>
           <View
             style={{
@@ -139,19 +152,25 @@ const BcDetailsScreen = () => {
             }}
           >
             <Text title3>{'Highlight & NextStep'}</Text>
-            <Text gray style={{ marginVertical: 5 }} >
+            <Text gray style={{ marginTop: 5 , marginBottom : 10 }} >
             {item.assets}
             </Text>
-            <View style = {{ flexDirection : 'row',  alignItems:'center'}}>
-                <Text callout  gray style = {{ textDecorationLine : 'underline'}}>
-                {'Next Step'} 
-                </Text>
-                <Icon name = 'arrow-right-thin' size = { 24 } color = { colors.primary} />
-                <Text subhead>
-                { item.nextStep }
-                </Text>
+            <View style = {{ flexDirection : 'row' }}>
+                <View style ={{ alignItems : 'center' , justifyContent: 'center'}}>
+                  <Text callout  gray style = {{ textDecorationLine : 'underline'}}>
+                    {'Next Step'} 
+                  </Text>
+                </View>
+                <View style ={{ alignItems : 'center' , justifyContent: 'center'}}>
+                  <Icon name = 'arrow-right-thin' size = { 24 } color = { colors.primary} />
+                </View>
+                <View style = {{ flex : 1 , justifyContent: 'center' }}>
+                  <Text subhead>
+                  { item.nextStep }
+                  </Text>
+                </View>
             </View>
-            <View style = {{ marginTop : 5 , flexDirection : 'row' , alignItems:'center'}}>
+            <View style = {{ marginTop : 10 , flexDirection : 'row' , alignItems:'center'}}>
                 <Text callout light  
                 style = {{ 
                     //textDecorationLine : 'underline'
@@ -212,8 +231,8 @@ const BcDetailsScreen = () => {
                 marginTop: 20,
               }}
             >
-              <LabelUpper2Row style={{ flex: 1 }} label={'Numero DA'} value={'DA'+item.daNumber}/>
-              <LabelUpper2Row style={{ flex: 1 }} label={'Ligne de compte'} value={item.projectID} />
+              <LabelUpper2Row style={{ flex: 1 }} label={'Numero DA'} value={'DA'+item.da?.daNumber}/>
+              <LabelUpper2Row style={{ flex: 1 }} label={'Ligne de compte'} value={item.project?.projectNumber} />
             </View>
             <View
               style={{
@@ -223,7 +242,7 @@ const BcDetailsScreen = () => {
               }}
             >
               <LabelUpper2Row style={{ flex: 1 }} label={'Type Prestation'} value={item.prestationType} />
-              <LabelUpper2Row style={{ flex: 1 }} label={'Montant TTC'} value={'XOF'+item.amountTTC} />
+              <LabelUpper2Row style={{ flex: 1 }} label={'Montant TTC'} value={'XOF '+item.amountTTC} />
             </View>
             <View
               style={{
@@ -237,9 +256,9 @@ const BcDetailsScreen = () => {
             </View>
           </View>
           <Text title3>{'Annexes'}</Text>
-          <ListMenuIcon style={{ paddingTop: 20 }} icon={'add-business'} iconColor = {colors.primary}  name={item.providedBy.name} />
-          <ListMenuIcon style={{ paddingVertical: 10 }} icon={'history'} iconColor = {colors.primary} name={'Voir historique des realisations'} />
-          <ListMenuIcon style={{ paddingVertical: 10 }} icon={'upload-file'} iconColor = {colors.primary} name={'Voir document projets'} />
+          <ListMenuIcon style={{ paddingTop: 20 }} icon={'add-business'} iconColor = {colors.primary}  title = {item.providedBy.name} />
+          <ListMenuIcon style={{ paddingVertical: 10 }} icon={'history'} iconColor = {colors.primary} title ={'Voir historique des realisations'} />
+          <ListMenuIcon style={{ paddingVertical: 10 }} icon={'upload-file'} iconColor = {colors.primary} title ={'Voir documents projets'} />
         </ScrollView>
       </View>
       <View style = {{ flexDirection : 'row' ,  marginVertical: 20 }}>

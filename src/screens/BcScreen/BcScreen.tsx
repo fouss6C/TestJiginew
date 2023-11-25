@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react'
-import { Alert, FlatList, RefreshControl, TouchableOpacity, View } from 'react-native'
+import { Alert, FlatList, RefreshControl, TouchableOpacity, View , ActivityIndicator } from 'react-native'
 //import  commandes  from '../../assets/data/CommandesList'
 import commandesSummary from  '../../assets/data/CommandesSummary'
 import colors from '../../theme/colors'
@@ -24,6 +24,7 @@ const BcScreen = (props) => {
   const [category, setCategory] = useState('')
   const { userToken } = useContext(AuthContext)
   const [commandes, setCommandes] = useState([])
+  const [commandeSummary, setCommandeSummary] = useState([])
 
   const tabs = [
     {
@@ -79,6 +80,36 @@ const BcScreen = (props) => {
     }
     response()
   }, [])
+
+  useEffect( () => {
+    const response = async () => {
+          await axios.get(`${BaseURL}/bonCommandes/summary`,
+        { headers: {
+          //'Content-Type': 'multipart/form-data' , 
+          'Authorization' : `Bearer ${userToken?.access_token}`,
+          'Accept' : 'application/json'
+        }
+        }
+        ).then(res => {
+            console.log (res.data)
+            setCommandeSummary (res.data)
+            console.log ( res.data)
+          }).catch((error)=> {
+            if( error.code == 'ERR_BAD_REQUEST') {
+              //Alert.alert( 'No response from server , check the URL ..')
+              console.log('Problème de chargement du rapport des demandes'+error.message)
+            } else {
+            // Alert.alert(error.message)
+            console.log(error.message)
+            }
+            console.log(error.code)
+          }).then( function () {
+            //
+          })
+    }
+    response()
+  }, [])
+
   const projects = useMemo(() => {
     enableExperimental()
     const filterCommand = (cmd ) => {
@@ -90,6 +121,7 @@ const BcScreen = (props) => {
       return filterCommand (commandes.filter((item) => item.status.tag === tab.id))
     }
   }, [tab,category,commandes])
+
 
   const navigateToProjectDetail = (item) => () => {
     navigation.navigate('BcDetails', {item : item })
@@ -131,7 +163,7 @@ const BcScreen = (props) => {
             <IconFont name="sliders-h" size={26} color={colors.primary} />
           </TouchableOpacity> */}
           </View>
-          {category.length > 0 ? null : (<PieChart data={commandesSummary} />)}
+          {category.length > 0 ? null : (<PieChart data={commandeSummary} />)}
           <TabTag
             style={{ paddingBottom: 20 }}
             tabs={tabs}
@@ -149,14 +181,18 @@ const BcScreen = (props) => {
                 onRefresh={() => {}}
               />
             }
-            ListEmptyComponent={({item}) => (<EmptyList  item = {category}/>) }
+            ListEmptyComponent = {({item}) =>
+            category ? (<EmptyList  item = {category}/>) : 
+            (<ActivityIndicator animating={true} color={colors.primary} />)
+            
+          }
             keyExtractor={(_item, index) => index.toString()}
             renderItem={({ item }) => (
               <ProjectCard
-                title={item.name}
-                description={item.context}
+                title={(item.name).slice(0, 27) + '...'}
+                description={(item.context).slice(0, 75) + '...' }
                 days={item.days+' jours'}
-                reference = { 'BC '+item.bcNumber}
+                reference = { 'BC'+item.bcNumber}
                 label = { item.jalon}
                 //members={item.members}
                 progress={item.executionRate}

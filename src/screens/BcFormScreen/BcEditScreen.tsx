@@ -1,5 +1,5 @@
 import { View,  ScrollView, TouchableOpacity, Alert } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TextInputMoney from '../../components/TextInputMoney'
 import { useNavigation, useRoute } from '@react-navigation/native'
@@ -7,21 +7,20 @@ import styles from './styles'
 import ListOptionSelected from '../../components/ListOptionSelected'
 import bcTypes from '../../assets/data/CommandesTypes'
 import bcStatus from '../../assets/data/CommandesStatus'
-import providers from '../../assets/data/ProvidersList'
 import TextInput from '../../components/TextInput'
 import Text from '../../components/Text'
 import { Typography } from '../../theme/typography'
 import colors from '../../theme/colors'
 import font from '../../theme/font'
 import SelectOptionModal from '../../components/SelectOptionModal'
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import Button from '../../components/Button'
 import { Controller, useForm } from 'react-hook-form'
 import IconMaterial from 'react-native-vector-icons/MaterialCommunityIcons'
-import DaNumbers from '../../assets/data/DemandesNumbers'
 import SearchModal from '../../components/SearchModal'
-import MonthYearPicker from '../../components/MonthlyYearPicker'
 import { Float } from 'react-native/Libraries/Types/CodegenTypes'
+import axios from 'axios'
+import { BaseURL } from '../../assets/config/config'
+import { AuthContext } from '../Context/AuthContextProvider'
 
 type formData = {
     amountTTC: string | Float
@@ -40,13 +39,14 @@ type formData = {
     acceptanceRate: number
     status: string 
     jalon: string 
-    //deadline: string
+    deadline: string
     //notification : string
 }
 
 const BcEditScreen = () => {
     const insets = useSafeAreaInsets()
     const [loading, setLoading] = useState(false)
+    const { userToken } = useContext(AuthContext)
     const route = useRoute()
     const [item , setItem] = useState(route?.params?.item)
     
@@ -54,24 +54,31 @@ const BcEditScreen = () => {
     const {control, handleSubmit , watch , reset , setValue } = useForm<formData>( { 
       defaultValues : { 
         amountTTC : item.amountTTC , 
-        name : item.title, 
+        name : item.name, 
         bcNumber : item.bcNumber,
-        daNumber : item.daNumber,
+        purchaseAt : item.purchasedAt,
+        daNumber : item.da.daNumber,
         assets : item.assets ,
-        motive : item.description ,
+        motive : item.context ,
         nextStep : item.nextStep,
         executionRate : item.executionRate.toString() , 
         savingRate : item.savingRate.toString() ,
         acceptanceRate : item.acceptanceRate.toString() , 
         jalon : item.jalon,
+        deadline : item.initialDeadline,
       }})
     // choice item hooks
     const [bcTypeSelected , setBcTypeSelected]=useState(bcTypes[0])
     const [bcStatusSelected , setBcStatusSelected]=useState(item.status)
+
+    const [providers , setProviders] = useState ([])
     const [providerSelected , setProviderSelected] = useState(item.providedBy)
-    const [daNumberSelected , setDaNumberSelected] = useState(DaNumbers[0])
-    const [ deadline  , setDeadline ] = useState(item.initialDeadline)
-    const [ notification , setNotification] = useState(item.purchasedAt)
+    const [loadingProvider , setLoadingProvider] = useState(true)
+    const [daNumbers , setDaNumbers] = useState([])
+    const [daNumberSelected , setDaNumberSelected] = useState(item?.da)
+    const [ loadingDaNumber , setLoadingDaNumber] = useState(true)
+    //const [ deadline  , setDeadline ] = useState(item.initialDeadline)
+    //const [ notification , setNotification] = useState(item.purchasedAt)
     //Modals visibility configs 
     const [bcTypeModalVisible, setBcTypeModalVisible] = useState(false)
     const [bcStatusModalVisible, setBcStatusModalVisible] = useState(false)
@@ -81,16 +88,107 @@ const BcEditScreen = () => {
     
     
     useEffect(()=> {
-        setValue('daNumber',daNumberSelected.tag)
+        setValue('daNumber',daNumberSelected.daNumber)
     } , [daNumberSelected])
 
-    useEffect(() => {
-      if (route?.params?.item) {
-        setItem(route?.params?.item)
-        console.log ( item )
-        navigation.setOptions({headerTitle :'BC '+ route?.params?.item.bcNumber})
-      }
+  useEffect(() => {
+    if (route?.params?.item) {
+      setItem(route?.params?.item)
+      console.log ( item )
+      navigation.setOptions({headerTitle :'BC '+ route?.params?.item.bcNumber})
+    }
+
+    // get list of providers and bcStatus 
+
   }, [route?.params?.item])
+
+  useEffect( () => {
+    const response = async () => {
+      await axios.get(`${BaseURL}/demandeAchats/DaNumbers`,
+    { headers: {
+      //'Content-Type': 'multipart/form-data' , 
+      'Authorization' : `Bearer ${userToken?.access_token}`,
+      'Accept' : 'application/json'
+    }}
+    ).then(res => {
+        //console.log (res.data)
+        const formatDaList = () => {
+          return res.data.map((item) => 
+            {
+              let x = { 
+                  id : item.id,
+                  iconName: item.id ==1 ? 'plus-circle' : 'minus-circle' ,
+                  iconColor: item.id < 4 ? colors.primary : colors.secondary,
+                  tag : item.daNumber, 
+                  text : item.name,
+              }
+              return x
+            }
+          )
+        }
+        setDaNumbers(formatDaList)
+        setLoadingDaNumber ( false )
+      }).catch((error)=> {
+        if( error.code == 'ERR_BAD_REQUEST') {
+          //Alert.alert( 'No response from server , check the URL ..')
+          console.log(error.message)
+        } else {
+         // Alert.alert(error.message)
+         console.log(error.message)
+        }
+        console.log(error.code)
+      }).then( function () {
+        //
+      })
+    }
+    response()
+    setValue('daNumber',daNumberSelected?.tag)
+  }, [daNumberSelected])
+
+  useEffect( () => {
+    const response = async () => {
+      await axios.get(`${BaseURL}/providers`,
+    { headers: {
+      //'Content-Type': 'multipart/form-data' , 
+      'Authorization' : `Bearer ${userToken?.access_token}`,
+      'Accept' : 'application/json'
+    }}
+    ).then(res => {
+        console.log (res.data)
+        const formatProviderList = () => {
+          return res.data.map((item) => 
+            {
+              let x = { 
+                id : item.id,
+                iconName: item.id ==1 ? 'plus-circle' : 'minus-circle' ,
+                iconColor: colors.primary,
+                tag : item.tag, 
+                text : item.name, 
+                description : item.address,
+              }
+              return x
+            }
+          )
+        }
+        setProviders(formatProviderList)
+        setLoadingProvider( false )
+      }).catch((error)=> {
+        if( error.code == 'ERR_BAD_REQUEST') {
+          //Alert.alert( 'No response from server , check the URL ..')
+          console.log(error.message)
+        } else {
+         // Alert.alert(error.message)
+         console.log(error.message)
+        }
+      }
+      ).then( function () {
+        //
+      })
+    }
+    response()
+  }, [])
+
+
 
     // set func for hooks 
     const onBcTypeSelect = (option) => {
@@ -110,7 +208,7 @@ const BcEditScreen = () => {
         setDaNumberModalVisible(false)
     }
 
-    const submitBcForm = async ({ amountTTC , name , bcNumber , daNumber , motive , nextStep , executionRate , savingRate, acceptanceRate , jalon , assets }: formData) => {
+    const submitBcForm = async ({ amountTTC , name , bcNumber , purchaseAt , daNumber , motive , nextStep , executionRate , savingRate, acceptanceRate , jalon , assets, deadline}: formData) => {
       if (loading) { return }
         setLoading(true)
       try {
@@ -118,7 +216,7 @@ const BcEditScreen = () => {
         savingRate + acceptanceRate + 
         bcNumber + daNumber + name + 
         jalon +  motive  + amountTTC + 
-        deadline + notification + bcTypeSelected.tag + 
+        deadline + purchaseAt + bcTypeSelected.tag + 
         providerSelected.tag , daNumberSelected.tag + nextStep +
          assets  )
       } catch ( e ) {
@@ -284,6 +382,56 @@ const BcEditScreen = () => {
               /> 
             </View>
             <View style = {{ marginTop : 10}}>
+              <Text body1 primary >
+                Date de Notification  
+              </Text>
+              <Controller
+                control={control}
+                name='purchaseAt'
+                rules={{
+                }}
+                render={({
+                  field: { value, onChange, onBlur },
+                  fieldState: { error },
+                }) => (
+                  <>
+                    <TextInput
+                        style={{
+                          marginTop: 2,
+                          height: 'auto',
+                          paddingVertical: 5,
+                          fontSize: font.size.s,
+                          borderWidth : 0.3,
+                          borderColor : colors.border,
+                          borderRadius : 1,
+                        }}
+                        inputStyle={Typography.body1}
+                        //minHeight={120}
+                        onChangeText={onChange}
+                        textAlignVertical="top"
+                        multiline={true}
+                        autoCorrect={false}
+                        placeholder={'21-10-2023 00:00:00'}
+                        placeholderTextColor={colors.gray}
+                        value={value as string}
+                        onBlur={onBlur}
+                        selectionColor={colors.primary}
+                        numberOfLines={1}
+                        //minLength = { 5 }
+                        maxLength = { 7 }
+                        //keyboardType = "numeric"
+                    />
+                      {error && (
+                        <Text style={{}}>
+                          {error.message || "Error"}
+                        </Text>
+                      )} 
+                  </>
+                )}
+              /> 
+            </View>
+
+            {/* <View style = {{ marginTop : 10}}>
                 <Text body1 primary >
                   Date Notification
                 </Text>
@@ -291,7 +439,7 @@ const BcEditScreen = () => {
                   style={{ marginTop: 5 }}
                   onChange={(dateInline) => setNotification(dateInline)}
                 />
-            </View>
+            </View> */}
             <View style = {{ marginTop : 10}}>
               <Text body1 primary >
                 Numero DA 
@@ -673,14 +821,54 @@ const BcEditScreen = () => {
               />
               
               <View style = {{ marginTop : 10}}>
-                <Text body1 primary >
-                  Date Clôture
-                </Text>
-                <MonthYearPicker
-                  style={{ marginTop: 5 }}
-                  onChange={(dateInline) => setDeadline (dateInline)}
-                />
-              </View>
+              <Text body1 primary >
+                Date de clôture  
+              </Text>
+              <Controller
+                control={control}
+                name='deadline'
+                rules={{
+                }}
+                render={({
+                  field: { value, onChange, onBlur },
+                  fieldState: { error },
+                }) => (
+                  <>
+                    <TextInput
+                        style={{
+                          marginTop: 2,
+                          height: 'auto',
+                          paddingVertical: 5,
+                          fontSize: font.size.s,
+                          borderWidth : 0.3,
+                          borderColor : colors.border,
+                          borderRadius : 1,
+                        }}
+                        inputStyle={Typography.body1}
+                        //minHeight={120}
+                        onChangeText={onChange}
+                        textAlignVertical="top"
+                        multiline={true}
+                        autoCorrect={false}
+                        placeholder={'21-10-2023 00:00:00'}
+                        placeholderTextColor={colors.gray}
+                        value={value as string}
+                        onBlur={onBlur}
+                        selectionColor={colors.primary}
+                        numberOfLines={1}
+                        //minLength = { 5 }
+                        maxLength = { 7 }
+                        //keyboardType = "numeric"
+                    />
+                      {error && (
+                        <Text style={{}}>
+                          {error.message || "Error"}
+                        </Text>
+                      )} 
+                  </>
+                )}
+              /> 
+            </View>
             <View style = {{ marginTop : 10}}>
               <Text body1 primary >
                 Contexte
@@ -726,23 +914,6 @@ const BcEditScreen = () => {
                 )}
               /> 
             </View>
-              {/* <View style={styles.viewImage}>
-                <TouchableOpacity
-                  style={[
-                    styles.image,
-                    {
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      borderWidth: 0.3,
-                      borderStyle: 'dotted',
-                      borderColor: colors.primary,
-                    },
-                  ]}
-                >
-                  <Icon name="plus-circle" size={24} color={colors.primary} />
-                  <Text subhead > Fichier BC </Text>
-                </TouchableOpacity>
-              </View> */}
           </ScrollView>
           <Button
             style={{ marginHorizontal: 5, marginVertical: 20 }}
@@ -766,18 +937,34 @@ const BcEditScreen = () => {
           onChange = {onBcTypeSelect}
           onSwipeComplete={() => setBcTypeModalVisible(false)}
         />
-        <SearchModal
-          isVisible={providerModalVisible}
-          options={providers}
-          onChange = {onProviderSelect}
-          onSwipeComplete={() => setProviderModalVisible(false)}
-        />
-        <SearchModal
-          isVisible={daNumberModalVisible}
-          options={DaNumbers}
-          onChange = {onDaNumberSelect}
-          onSwipeComplete={() => setDaNumberModalVisible(false)}
-        />
+        {
+          !loadingProvider ?
+
+          (<SearchModal
+            isVisible={providerModalVisible}
+            options={providers}
+            onChange = {onProviderSelect}
+            onSwipeComplete={() => setProviderModalVisible(false)}
+          />) : 
+          (
+            <>
+            </>
+          )
+        }
+        {
+          !loadingDaNumber ? 
+
+          (<SearchModal
+            isVisible={daNumberModalVisible}
+            options={daNumbers}
+            onChange = {onDaNumberSelect}
+            onSwipeComplete={() => setDaNumberModalVisible(false)}
+          />) : 
+          (
+            <>
+            </>
+          )
+        }
       </View>
     )
 }

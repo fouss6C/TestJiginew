@@ -1,4 +1,4 @@
-import { View, Text, Image, Alert , ScrollView , TouchableOpacity } from 'react-native'
+import { View, Text, Image, Alert , ScrollView , TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
 import React , { useEffect, useState} from 'react'
 import AuthBtn from '../../../components/auth/button/AuthBtn'
 import colors from '../../../theme/colors'
@@ -39,37 +39,46 @@ type signUpData = {
 }
 
 const SignUpScreen = () => {
+
     const {control, handleSubmit , watch , reset } = useForm<signUpData>()
-    const [selected, setSelected] = useState<string>()
+   //const [selected, setSelected] = useState<string>()
+    const [loading , setLoading ] = useState( false )
     const pwd = watch('password')
     const navigation = useNavigation<WelcomeNavigationProp>()
     const insets = useSafeAreaInsets()
-    const [ groupSelected , setGroupSelected] = useState(GroupList[0])
+    const [group , setGroup] = useState([])
+    const [ groupSelected , setGroupSelected] = useState('')
+    const [LoadingGroup , setLoadingGroup] = useState(true)
     const [ groupModalVisible , setGroupModalVisible] = useState(false)
-    //const [serviceGroup , setServiceGroup] = useState(ServiceGroup[0])
-    
-    const onGroupSelect = (item)=> {
-      setGroupSelected(item)
-      setGroupModalVisible(false)
-    }
 
-    const SignUpSubmit = ({phoneNumber , email , firstName, lastName , password, passwordRepeat}: signUpData) => {
-      const response =  async () => {
-        let data = {
-          "email" : email,
-          "phone": phoneNumber , 
-          "firstName" : firstName,
-          "lastName" : lastName,
-          "password" : password,
-          "GroupID" : groupSelected.id 
-        }
-        await axios.post(`${BaseURL}/users/inscription`,data ,
-        {
-          headers: 
-          {'Content-Type': 'multipart/form-data'}
-        }
+    useEffect( () => {
+      const response = async () => {
+        await axios.get(`${BaseURL}/groupes`,
+      { headers: {
+        //'Content-Type': 'multipart/form-data' , 
+        //'Authorization' : `Bearer ${userToken?.access_token}`,
+        'Accept' : 'application/json'
+      }}
       ).then(res => {
-          Alert.alert ( 'Veuillez valider votre demande de compte avec l\'administrateur..')
+          console.log (res.data)
+          const formatGroupList = () => {
+            return res.data.map((item) => 
+              {
+                let x = { 
+                    id : item.id,
+                    iconName: item.id ==1 ? 'plus-circle' : 'minus-circle' ,
+                    iconColor: item.id < 4 ? colors.primary : colors.secondary,
+                    tag : item.groupID, 
+                    text : item.name, 
+                    description : item.tag,
+                }
+                return x
+              }
+            )
+          }
+          setGroup(formatGroupList)
+          setLoadingGroup( false )
+
         }).catch((error)=> {
           if( error.code == 'ERR_BAD_REQUEST') {
             //Alert.alert( 'No response from server , check the URL ..')
@@ -81,6 +90,60 @@ const SignUpScreen = () => {
           console.log(error.code)
         }).then( function () {
           //
+        })
+      }
+      response()
+    }, [])
+
+    useEffect(()=> {
+      if ( group.length > 0 )
+      setGroupSelected ( group[0])
+    },
+    [LoadingGroup])
+    
+    const onGroupSelect = (item)=> {
+      setGroupSelected(item)
+      setGroupModalVisible(false)
+    }
+
+    const SignUpSubmit = ({phoneNumber , email , firstName, lastName , password, passwordRepeat}: signUpData) => {
+
+      setLoading(true)
+      const response =  async () => {
+        await axios.post(`${BaseURL}/users/inscription`, 
+        JSON.stringify
+          ({
+            "email" : email ,
+            "phone" : phoneNumber , 
+            "firstName" : firstName ,
+            "lastName" : lastName ,
+            "password" : password ,
+            "group" : groupSelected.tag
+          })
+        ,
+        {
+          
+          headers: {
+            'content-type': 'application/json',
+            //'X-RapidAPI-Key': 'your-rapidapi-key',
+            //'X-RapidAPI-Host': 'microsoft-translator-text.p.rapidapi.com',
+          }
+        }
+
+      ).then(res => {
+          Alert.alert ( 'Veuillez valider votre demande de compte avec l\'administrateur..')
+      }).catch((error)=> {
+          if( error.code == 'ERR_BAD_REQUEST') {
+            //Alert.alert( 'No response from server , check the URL ..')
+            console.log(error.message)
+          } else {
+           // Alert.alert(error.message)
+           console.log(error.message)
+          }
+          console.log(error.code)
+        }).then( function () {
+          //
+          setLoading( false )
         })
       }
       response()
@@ -96,6 +159,7 @@ const SignUpScreen = () => {
       paddingBottom: insets.bottom, 
       paddingLeft: insets.left,
       paddingRight: insets.right} ]}>
+     
       <TouchableOpacity  style = {styles.arrow} onPress={BackToWelcome}>
         <Image style={styles.backArrowStyle} source={ require (backArrow) } />
       </TouchableOpacity>
@@ -106,6 +170,7 @@ const SignUpScreen = () => {
         <Image source = {require(logo)} style = {styles.imageLogo}/>
       </View>
        {/* form content data view  */}
+       
        <View style = {styles.formContainer}> 
        <FormInput
           name="firstName"
@@ -208,7 +273,7 @@ const SignUpScreen = () => {
           style={{ 
             //marginTop: 15 
           }}
-          textLeft={'Service ' +groupSelected?.text}
+          textLeft={'Service ' + groupSelected?.text}
           textRight={''}
           onPress={() =>
             setGroupModalVisible(true)
@@ -220,24 +285,34 @@ const SignUpScreen = () => {
           style = {styles.signupContainer}
           round 
           onPress={handleSubmit(SignUpSubmit)} 
+          loading = {loading}
         >
           Envoyer 
         </Button>
          {/*  <AuthBtn label = "Envoyer" onPress={handleSubmit(SignUpSubmit)} color= { colors.primary} /> */}
          </View>
-      <View style = { styles.tos }>
-        <TextCustom footnote >
-          Par Envoyer , vous <Text style = {{}}>acceptez</Text> par la même occasion 
-        </TextCustom>
-        <TextCustom footnote style = {{color : colors.primary }}> les conditions generales d'utilisation du service</TextCustom>
-      </View>
+        <View style = { styles.tos }>
+          <TextCustom footnote >
+            Par Envoyer , vous <Text style = {{}}>acceptez</Text> par la même occasion 
+          </TextCustom>
+          <TextCustom footnote style = {{color : colors.primary }}> les conditions generales d'utilisation du service</TextCustom>
+        </View>
     </View>
-    <SearchOptionModal
-        isVisible={groupModalVisible}
-        options={GroupList}
-        onChange = {onGroupSelect}
-        onSwipeComplete={() => setGroupModalVisible(false)}
-    />
+    {
+      !LoadingGroup ? 
+      (
+        <SearchOptionModal
+          isVisible={groupModalVisible}
+          options={ group }
+          onChange = {onGroupSelect}
+          onSwipeComplete={() => setGroupModalVisible(false)}
+        />
+      ) : 
+      (
+        <>
+        </>
+      )
+    }
     </>
   )
 }

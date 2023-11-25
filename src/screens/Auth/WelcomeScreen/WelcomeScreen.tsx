@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable, Alert } from 'react-native'
+import { View, Text, Image, Pressable, Alert, ImageBackground } from 'react-native'
 import React from 'react'
 import style from './styles'
 import Icon6 from 'react-native-vector-icons/FontAwesome6'
@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Button from '../../../components/Button'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 const logo = "../../../assets/image/logo-hand.png"
+const imageBackground = '../../../assets/image/imageBackgroundSm.png'
 
 
 const WelcomeScreen = () => {
@@ -24,13 +25,15 @@ const WelcomeScreen = () => {
     Navigator.navigate("SignUp")
   }
   return (
-   
     <View style ={ [style.container , 
       {paddingTop: insets.top, 
       paddingBottom: insets.bottom, 
       paddingLeft: insets.left,
       paddingRight: insets.right} ] }>
         {/* Logo of Jiginew App  */}
+        {/* <View style = {{ width : '100%' , height : 'strech'}}> 
+        <Image source = { require (imageBackground)}  resizeMode = 'contain'  />
+        </View> */}
         <View style = { style.logo } >
           <Image  source = { require (logo) } style = {style.logoImage} />
          {/* <MaterialComIcon  name = "hand-coin-outline" size = { 80 } color = { colors.primary} />  */}

@@ -1,11 +1,12 @@
-import { View,  ScrollView, TouchableOpacity, Alert, KeyboardAvoidingView } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View,  ScrollView, TouchableOpacity, Alert } from 'react-native'
+import React, { useContext, useEffect, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TextInputMoney from '../../components/TextInputMoney'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
 import styles from './styles'
 import ListOptionSelected from '../../components/ListOptionSelected'
-import ProjectTypes from '../../assets/data/ProjectLineType'
+import prestationTypes from '../../assets/data/DemandesAchatPrestationTypes'
+import bcStatus from '../../assets/data/CommandesStatus'
 import providers from '../../assets/data/ProvidersList'
 import TextInput from '../../components/TextInput'
 import Text from '../../components/Text'
@@ -13,67 +14,193 @@ import { Typography } from '../../theme/typography'
 import colors from '../../theme/colors'
 import font from '../../theme/font'
 import SelectOptionModal from '../../components/SelectOptionModal'
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import Button from '../../components/Button'
 import { Controller, useForm } from 'react-hook-form'
 import IconMaterial from 'react-native-vector-icons/MaterialCommunityIcons'
-import actIDs from '../../assets/data/AccountNumbersList'
 import SearchModal from '../../components/SearchModal'
-import MonthYearPicker from '../../components/MonthlyYearPicker'
 import { Float } from 'react-native/Libraries/Types/CodegenTypes'
-
+import axios from 'axios'
+import { BaseURL } from '../../assets/config/config'
+import { AuthContext } from '../Context/AuthContextProvider'
 
 type formData = {
-  amountTTC: string | Float
-  amountHT : string | Float
-  name: string
-  actID : string 
-  projectID : string 
-  type : string
-  motive: string
+    amountTTC: string | Float
+    amountHT: string | Float 
+    name: string
+    reference: string
+    bcNumber : string 
+    daNumber : string 
+    providedBy : string
+    motivation : string
+    project: string
+    status: string 
+    prestationType: string 
 }
 
-const ProjectFormScreen = () => {
+const DaEditScreen = () => {
     const insets = useSafeAreaInsets()
+    const { userToken } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
+    const route = useRoute()
+    const [item , setItem] = useState(route?.params?.item)
+    const navigation = useNavigation()
+    
     // input item hooks 
-    const {control, handleSubmit , watch , reset , setValue } = useForm<formData>( { defaultValues : { amountTTC : 500000}})
+    const {control, handleSubmit , watch , reset , setValue } = useForm<formData>( { 
+      defaultValues : { 
+        amountTTC : item.amountTTC , 
+        amountHT : item.amountHT,
+        name : item.name, 
+        bcNumber : item.bcNumber,
+        daNumber : item.daNumber,
+        reference : item.reference ,
+        motivation : item.motivation ,
+        project : item.project.projectNumber , 
+      }})
     // choice item hooks
-    const [typeSelected , setTypeSelected]=useState(ProjectTypes[0])
-    const [actIDSelected , setactIDSelected] = useState(actIDs[0])
-    //Modals visibility configs 
-    const [typeModalVisible, setTypeModalVisible] = useState(false)
-    const [actIDModalVisible, setactIDModalVisible] = useState(false)
 
-    const [optionChoosed, setOptionChoosed] = useState()
-    const navigation = useNavigation();
+    const [projects , setProjects] = useState([])
+    const [providers , setProviders] = useState([])
+
+    const [loadingProject , setLoadingProject] = useState(true)
+    const [loadingProvider , setLoadingProvider] = useState( true )
+
+    const [prestationTypeSelected , setPrestationTypeSelected]=useState(item.prestationType)
+    const [providerSelected , setProviderSelected] = useState(item.providedBy)
+    const [projectSelected , setProjectSelected] = useState('')
+    //Modals visibility configs 
+  
+    const [prestationTypeModalVisible, setPrestationTypeModalVisible] = useState(false)
+    const [providerModalVisible, setProviderModalVisible] = useState(false)
+    const [projectModalVisible, setProjectModalVisible] = useState(false)
+
+   
+    
     
     useEffect(()=> {
-        setValue('actID',actIDSelected.tag)
-    } , [actIDSelected])
+        setValue('project',projectSelected.projectNumber)
+    } , [projectSelected])
 
-    // set func for hooks 
-    const onTypeSelect = (option) => {
-      setTypeSelected(option)
-      setTypeModalVisible(false)
+    useEffect(() => {
+      if (route?.params?.item) {
+        setItem(route?.params?.item)
+        //console.log ( item )
+        navigation.setOptions({
+          headerTitle : route?.params?.item.daNumber ? 'DA '+ route?.params?.item.daNumber : route?.params?.item.reference 
+        })
+      }
+
+      // get list of providers and bcStatus 
+
+  }, [route?.params?.item])
+
+  useEffect( () => {
+    const response = async () => {
+      await axios.get(`${BaseURL}/projets/projectIDs`,
+    { headers: {
+      //'Content-Type': 'multipart/form-data' , 
+      'Authorization' : `Bearer ${userToken?.access_token}`,
+      'Accept' : 'application/json'
+    }}
+    ).then(res => {
+        //console.log (res.data)
+        const formatDaList = () => {
+          return res.data.map((item) => 
+            {
+              let x = { 
+                  id : item.id,
+                  iconName: item.id ==1 ? 'plus-circle' : 'minus-circle' ,
+                  iconColor: item.id < 4 ? colors.primary : colors.secondary,
+                  tag : item.projectID, 
+                  text : item.name,
+              }
+              return x
+            }
+          )
+        }
+        setProjects(formatDaList)
+        setLoadingProject ( false )
+
+      }).catch((error)=> {
+        if( error.code == 'ERR_BAD_REQUEST') {
+          //Alert.alert( 'No response from server , check the URL ..')
+          console.log(error.message)
+        } else {
+         // Alert.alert(error.message)
+         console.log(error.message)
+        }
+        console.log(error.code)
+      }).then( function () {
+        //
+      })
     }
-    const onactIDSelect = (option) => {
-        setactIDSelected(option)
-        setactIDModalVisible(false)
+    response()
+    setValue('project',projectSelected?.tag)
+  }, [projectSelected])
+
+  useEffect( () => {
+    const response = async () => {
+      await axios.get(`${BaseURL}/providers`,
+    { headers: {
+      //'Content-Type': 'multipart/form-data' , 
+      'Authorization' : `Bearer ${userToken?.access_token}`,
+      'Accept' : 'application/json'
+    }}
+    ).then(res => {
+        //console.log (res.data)
+        const formatProviderList = () => {
+          return res.data.map((item) => 
+            {
+              let x = { 
+                id : item.id,
+                iconName: item.id ==1 ? 'plus-circle' : 'minus-circle' ,
+                iconColor: colors.primary,
+                tag : item.tag, 
+                text : item.name, 
+                description : item.address,
+              }
+              return x
+            }
+          )
+        }
+        setProviders(formatProviderList)
+        setLoadingProvider( false )
+      }).catch((error)=> {
+        if( error.code == 'ERR_BAD_REQUEST') {
+          //Alert.alert( 'No response from server , check the URL ..')
+          console.log(error.message)
+        } else {
+         // Alert.alert(error.message)
+         console.log(error.message)
+        }
+      }
+      ).then( function () {
+        //
+      })
     }
-    
+    response()
+  }, [])
 
-    const goDaSearchScreen = () => {
-
+    const onPrestationTypeSelect = (option) => {
+      setPrestationTypeSelected(option)
+      setPrestationTypeModalVisible(false)
+    }
+    const onProviderSelect = (option) => {
+      setProviderSelected(option)
+      setProviderModalVisible(false)
+    }
+    const onProjectSelect = (option) => {
+        setProjectSelected(option)
+        setProjectModalVisible(false)
     }
 
-    const submitProjectForm = async ({amountTTC , amountHT ,  name , projectID , actID , motive }: formData) => {
+    const submitBcForm = async ({ amountTTC , amountHT , name , bcNumber , daNumber , motivation , project, prestationType }: formData) => {
       if (loading) { return }
         setLoading(true)
       try {
-       // const response = await Auth.signUp ({username , password , attributes : { name , email , phone_number}})
-        //navigation.navigate('Confirm email', {username});
-        await console.log('this is parameter ', projectID + actID + name + amountTTC + amountHT + typeSelected.tag + actIDSelected.tag)
+        await console.log('this is parameter ', 
+        bcNumber + daNumber + name + 
+        prestationType +  motivation  + amountTTC + amountHT + providerSelected.tag , projectSelected.tag + project.tag )
       } catch ( e ) {
         Alert.alert ( " Erreur de creation : ", (e as Error ).message )
   
@@ -81,7 +208,6 @@ const ProjectFormScreen = () => {
         setLoading(false)
       }
     }
-    
     return (
       <View
         style={{
@@ -96,16 +222,14 @@ const ProjectFormScreen = () => {
         }}
       >
         <View style = { styles.container }>
-        <KeyboardAvoidingView style = {{ flex : 1}} behavior={Platform.OS ==='ios' ? "padding" : "height"}>
           <View
             style={{
               alignItems: 'center',
               justifyContent: 'center',
-              paddingHorizontal: 10,
+              paddingHorizontal: 5,
               marginTop: 5
             }}
           >
-
             <Controller
                 control={control}
                 name='amountTTC'
@@ -128,9 +252,10 @@ const ProjectFormScreen = () => {
                         textAlign = {'center'}
                         inputStyle={Typography.title2}
                         //placeholder='XOF Montant TTC'
-                        value={value}
+                        value={value }
                         onChange={onChange}
                         onBlur={onBlur}
+                        defaultValue = { item.amountTTC}
                     />
                       {error && (
                         <Text style={{}}>
@@ -141,7 +266,7 @@ const ProjectFormScreen = () => {
                 )}
             />
           </View>
-          <ScrollView style = {{ flex : 1 , width: '100%' , marginTop : 20}}>
+          <ScrollView style = {{ flex : 1 , width: '100%' , paddingHorizontal: 5, marginTop : 20}}>
             <View style = {{ }}>
               <Text body1 primary>
                 Objet : 
@@ -172,13 +297,61 @@ const ProjectFormScreen = () => {
                         textAlignVertical="top"
                         multiline={true}
                         autoCorrect={false}
-                        placeholder={'Designation de l\'Investissement'}
+                        placeholder={'Objet de la commande '}
                         placeholderTextColor={colors.gray}
                         value={value as string}
                         onBlur={onBlur}
                         selectionColor={colors.primary}
                         numberOfLines={1}
                         maxLength = { 40 }
+                    />
+                      {error && (
+                        <Text style={{}}>
+                          {error.message || "Error"}
+                        </Text>
+                      )} 
+                  </>
+                )}
+              /> 
+            </View>
+            <View style = {{ marginTop : 10}}>
+              <Text body1 primary >
+                Reference
+              </Text>
+              <Controller
+                control={control}
+                name='reference'
+                rules={{
+                }}
+                render={({
+                  field: { value, onChange, onBlur },
+                  fieldState: { error },
+                }) => (
+                  <>
+                    <TextInput
+                        style={{
+                          marginTop: 2,
+                          height: 'auto',
+                          paddingVertical: 5,
+                          fontSize: font.size.s,
+                          borderWidth : 0.3,
+                          borderColor : colors.border,
+                          borderRadius : 1,
+                        }}
+                        inputStyle={Typography.body1}
+                        //minHeight={120}
+                        onChangeText={onChange}
+                        textAlignVertical="top"
+                        multiline={true}
+                        autoCorrect={false}
+                        placeholder={'11111'}
+                        placeholderTextColor={colors.gray}
+                        value={value as string}
+                        onBlur={onBlur}
+                        selectionColor={colors.primary}
+                        numberOfLines={1}
+                        //minLength = { 5 }
+                        maxLength = { 7 }
                     />
                       {error && (
                         <Text style={{}}>
@@ -214,8 +387,9 @@ const ProjectFormScreen = () => {
                       }}
                       styleText={{marginLeft : 'auto', }}
                       inputStyle={Typography.body2}
-                      placeholder='XOF Montant HT'
-                      value={value as number} 
+                      //placeholder='XOF Montant HT'
+                      valu={value} 
+                      defaultValue= { item.amountHT}
                       onChange={onChange}
                     />
                       {error && (
@@ -229,11 +403,11 @@ const ProjectFormScreen = () => {
             </View>
             <View style = {{ marginTop : 10}}>
               <Text body1 primary >
-                Identifiant projet
+                Numero DA 
               </Text>
               <Controller
                 control={control}
-                name='projectID'
+                name='daNumber'
                 rules={{
                 }}
                 render={({
@@ -257,7 +431,7 @@ const ProjectFormScreen = () => {
                         textAlignVertical="top"
                         multiline={true}
                         autoCorrect={false}
-                        placeholder={'245008'}
+                        placeholder={'11111'}
                         placeholderTextColor={colors.gray}
                         value={value as string}
                         onBlur={onBlur}
@@ -278,7 +452,56 @@ const ProjectFormScreen = () => {
             </View>
             <View style = {{ marginTop : 10}}>
               <Text body1 primary >
-                Numero de compte
+                Numero BC 
+              </Text>
+              <Controller
+                control={control}
+                name='bcNumber'
+                rules={{
+                }}
+                render={({
+                  field: { value, onChange, onBlur },
+                  fieldState: { error },
+                }) => (
+                  <>
+                    <TextInput
+                        style={{
+                          marginTop: 2,
+                          height: 'auto',
+                          paddingVertical: 5,
+                          fontSize: font.size.s,
+                          borderWidth : 0.3,
+                          borderColor : colors.border,
+                          borderRadius : 1,
+                        }}
+                        inputStyle={Typography.body1}
+                        //minHeight={120}
+                        onChangeText={onChange}
+                        textAlignVertical="top"
+                        multiline={true}
+                        autoCorrect={false}
+                        placeholder={'22222'}
+                        placeholderTextColor={colors.gray}
+                        value={value as string}
+                        onBlur={onBlur}
+                        selectionColor={colors.primary}
+                        numberOfLines={1}
+                        //minLength = { 5 }
+                        maxLength = { 7 }
+                        keyboardType = "numeric"
+                    />
+                      {error && (
+                        <Text style={{}}>
+                          {error.message || "Error"}
+                        </Text>
+                      )} 
+                  </>
+                )}
+              /> 
+            </View>
+            <View style = {{ marginTop : 10}}>
+              <Text body1 primary >
+                Ligne Budgetaire 
               </Text>
               <View
                 style={{
@@ -289,7 +512,7 @@ const ProjectFormScreen = () => {
               >
                     <Controller
                         control={control}
-                        name='actID'
+                        name='project'
                         rules={{
                         }}
                         render={({
@@ -314,15 +537,14 @@ const ProjectFormScreen = () => {
                                 textAlignVertical="top"
                                 multiline={true}
                                 autoCorrect={false}
-                                placeholder={'25008'}
+                                placeholder={'PR1111'}
                                 placeholderTextColor={colors.gray}
                                 value={value as string}
                                 onBlur={onBlur}
                                 selectionColor={colors.primary}
                                 numberOfLines={1}
                                 //minLength = { 5 }
-                                maxLength = { 7 }
-                                keyboardType = "numeric"
+                                maxLength = { 10 }
                             />
                             {error && (
                                 <Text style={{}}>
@@ -334,29 +556,40 @@ const ProjectFormScreen = () => {
                     />
                 <TouchableOpacity 
                     style={{ paddingLeft: 5 }} 
-                    onPress={() => setactIDModalVisible(true)}
+                    onPress={() => setProjectModalVisible(true)}
                 >
                     <IconMaterial name="filter-menu-outline" size={24} color={colors.primary} />
                 </TouchableOpacity>
                 </View>
-              
-            </View>
+              </View>
+
               <ListOptionSelected
                 style={{ marginTop: 10 }}
-                textLeft={'Type investissement'}
-                textRight={typeSelected?.text}
+                textLeft={'Type Prestation'}
+                textRight={prestationTypeSelected?.text }
                 onPress={() =>{
-                  setTypeModalVisible(true)
+                  setPrestationTypeModalVisible(true)
                 }}
                 primary
               />
+              
+              <ListOptionSelected
+                style={{ marginTop: 10 }}
+                textLeft={'Fournisseur'}
+                textRight={providerSelected?.text || providerSelected?.name}
+                onPress={() =>
+                  setProviderModalVisible(true)
+                }
+                primary
+              />
+              
             <View style = {{ marginTop : 10}}>
               <Text body1 primary >
                 Motivation
               </Text>
               <Controller
                 control={control}
-                name='motive'
+                name='motivation'
                 rules={{
                 }}
                 render={({
@@ -375,12 +608,12 @@ const ProjectFormScreen = () => {
                           borderRadius : 1,
                         }}
                         inputStyle={Typography.body1}
-                        minHeight={130}
+                        minHeight={100}
                         onChangeText={onChange}
                         textAlignVertical="top"
                         multiline={true}
                         autoCorrect={false}
-                        placeholder={'motive du projet..'}
+                        placeholder={'Description du projet..'}
                         placeholderTextColor={colors.gray}
                         value={value as string }
                         selectionColor={colors.primary}
@@ -395,33 +628,54 @@ const ProjectFormScreen = () => {
                 )}
               /> 
             </View>
+              
           </ScrollView>
           <Button
-            style={{ marginHorizontal: 5, marginBottom: 20 }}
-            onPress={handleSubmit(submitProjectForm)}
+            style={{ marginHorizontal: 5, marginVertical: 20 }}
+            onPress={handleSubmit(submitBcForm)}
             //outline
             loading={loading}
             round
           >
           {'Soumettre'}
           </Button>
-        </KeyboardAvoidingView>
         </View>
-        
+
         <SelectOptionModal
-          isVisible={typeModalVisible}
-          options={ProjectTypes}
-          onChange = {onTypeSelect}
-          onSwipeComplete={() => setTypeModalVisible(false)}
+          isVisible={prestationTypeModalVisible}
+          options={prestationTypes}
+          onChange = {onPrestationTypeSelect}
+          onSwipeComplete={() => setPrestationTypeModalVisible(false)}
         />
-        <SearchModal
-            isVisible={actIDModalVisible}
-            options={actIDs}
-            onChange = {onactIDSelect}
-            onSwipeComplete={() => setactIDModalVisible(false)}
-        />
+        {
+          !loadingProvider ?
+
+            (<SearchModal
+              isVisible={providerModalVisible}
+              options={providers}
+              onChange = {onProviderSelect}
+              onSwipeComplete={() => setProviderModalVisible(false)}
+            />) :
+            (
+              <>
+              </>
+            )
+        }
         
+        {
+          !loadingProject ? 
+              (<SearchModal
+                isVisible={projectModalVisible}
+                options={projects}
+                onChange = {onProjectSelect}
+                onSwipeComplete={() => setProjectModalVisible(false)}
+              />) : 
+              (
+                <>
+                </>
+              )
+        }
       </View>
     )
 }
-export default ProjectFormScreen
+export default DaEditScreen

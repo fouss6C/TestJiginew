@@ -10,7 +10,7 @@ import DaFilterScreen from '../DaFilterScreen'
 import DaDetailsScreen from '../DaDetailsScreen'
 import DaFormScreen from '../DaFormScreen/DaFormScreen'
 import Text from '../../components/Text'
-import DaEditScreen from '../DaEditDetailsScreen'
+import DaEditScreen from '../DaFormScreen/DaEditScreen'
 import { Typography } from '../../theme/typography'
 import BcDetailsScreen from '../BcDetailsScreen/BcDetailsScreen'
 import DaFormStackNavigator from './DaFormStackNavigator'
@@ -192,6 +192,16 @@ const NavigationRoot = () => {
                 <Stack.Screen
                     name = "BcEdit"
                     component={BcEditScreen}
+                    options={{
+                        headerShown : true , 
+                        headerBackTitleVisible:false,
+                        headerTitleAlign :'center',
+                        headerTitleStyle:[{fontFamily:'Raleway'},Typography.title2]
+                    }}
+                />
+                <Stack.Screen
+                    name = "DaEdit"
+                    component={DaEditScreen}
                     options={{
                         headerShown : true , 
                         headerBackTitleVisible:false,

@@ -1,4 +1,4 @@
-import { View, Text , Pressable, ScrollView, FlatList, RefreshControl, TouchableOpacity, Alert} from 'react-native'
+import { View, Text , Pressable, ScrollView, FlatList, RefreshControl, TouchableOpacity, Alert, ActivityIndicator} from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import HeaderHome from '../../components/Card/HeaderHome'
@@ -384,19 +384,22 @@ useEffect( () => {
           }
           data={accountMain}
           keyExtractor={(_item, index) => index.toString()}
-          ListEmptyComponent={({item}) => (<EmptyList  item = {item}/>)}
+          ListEmptyComponent={({item}) => 
+            (<ActivityIndicator animating={true} color={colors.primary} />)
+            //(<EmptyList  item = {item}/>)
+          }
           renderItem={({ item: itemInline, index }) => (
             <Price2Col
               key={index}
-              tagAct= {itemInline.tag }
+              tagAct= {itemInline?.tag }
               //image={itemInline.image}
-              code={itemInline.acctID}
-              name={itemInline.name}
-              usedBal={itemInline.usedBal}
-              initialBal={(itemInline.initialAmountTTC / Math.pow(10,6)).toFixed(2) + 'MX'}
-              percent={itemInline.percent?itemInline.percent : '10%'} // consumption rate of Budget
-              currentBal={'MX'+(itemInline.balance/ Math.pow(10,6)).toFixed(2)}
-              isUp={itemInline.isUp}
+              code={itemInline?.acctID}
+              name={itemInline?.name}
+              usedBal={Math.abs(itemInline.initialAmountTTC - itemInline?.balance) + ''}
+              initialBal={(itemInline?.initialAmountTTC / Math.pow(10,6)).toFixed(2) + 'MX'}
+              percent={ (Math.abs(itemInline.initialAmountTTC - itemInline?.balance) * 100 /itemInline.initialAmountTTC).toFixed(2) + '%' } // consumption rate of Budget
+              currentBal={'MX'+(itemInline?.balance/ Math.pow(10,6)).toFixed(2)}
+              isUp={itemInline.balance > itemInline.initialAmountTTC ? true : false }
               statusAct={itemInline.status.tag}
               onPress={() => {}}
             />

@@ -16,6 +16,7 @@ type detailsType = {
     id: number
     reference : string 
     name: string
+    motivation : string 
     createdAt: string
     notifiedAt: string
     issuedAt : string 
@@ -45,7 +46,7 @@ const DaDetailsScreen = () => {
     const [modifyLoading, setModifyLoading] = useState(false)
     const navigation = useNavigation()
     const route = useRoute()
-    const [item, setItem] = useState<detailsType>(DachatsInfo)
+    const [item, setItem] = useState<detailsType>(route?.params?.item)
     const [statusSelected , setStatusSelected] = useState('')
     const [statusModalVisible , setStatusModalVisible] = useState(false)
 
@@ -53,30 +54,51 @@ const DaDetailsScreen = () => {
         if (route?.params?.item) {
           // get the DA information from API , by ID 
           setItem(route?.params?.item)
-          navigation.setOptions({headerTitle :'DA '+ route?.params?.item.daNumber })
+          navigation.setOptions({
+            headerTitle : route?.params?.item.daNumber ? 'DA '+ route?.params?.item.daNumber : route?.params?.item.reference 
+          })
         }
     }, [route?.params?.item])
 
-    const onDaStatusSelect = (option) => {
+    const formatDate = (date) => {
+      let d = new Date(date),
+          month = '' + (d.getMonth() + 1),
+          day = '' + d.getDate(),
+          year = d.getFullYear();
+  
+      if (month.length < 2)
+          month = '0' + month;
+      if (day.length < 2) 
+          day = '0' + day;
+      return [year, month, day].join('-');
+    }
+
+    const onDaStatusSelect = (option , x = item.id) => {
         setStatusSelected(option);
         setStatusModalVisible(false);
         // render an Alert Message with the new Status for validation 
-        Alert.alert('Changement de Statut DA ', 'Merci de bien vouloir confirmer ?', 
+        Alert.alert('Validation DA ', 'Souhaitez-vous faire passer cette demande  à ' + option.text,
         [
           {
-            text: 'Ask me later',
-            onPress: () => console.log('Ask me later pressed'),
-          },
-          {
-            text: 'Cancel',
+            text: 'Annuler',
             onPress: () => console.log('Cancel Pressed'),
             style: 'cancel',
           },
-          {text: 'OK', onPress: () => console.log('OK Pressed')},
+          {
+            text: 'Confirmer', 
+            onPress: () => changeStatusDa( x , option.id)
+          },
         ])
     }
+    const changeStatusDa = (daID , statusID) => {
+      console.log ( '' + daID + '   ' + statusID )
+    }
+    
+    const navigateToDaEdit = () => {
+      navigation.navigate('DaEdit', { item : route?.params?.item })
+    }
     const navigateToHistory = () => {
-      navigation.navigate('DaHistory', { item : item })
+      navigation.navigate('DaHistory', {item : item })
     }
 
   return (
@@ -95,23 +117,23 @@ const DaDetailsScreen = () => {
             }}
           >
             <View style={{ flex: 1 }}>
-                <Text title2 style ={{ fontFamily : 'Roboto'}}>{'DA'+ DachatsInfo.daNumber } 
-                    <Text subhead gray> { '#'+DachatsInfo.createdByService }
-                    </Text>
-                </Text>
+              <Text title2 style ={{ fontFamily : 'Roboto'}}>{ item.daNumber ? 'DA '+ item.daNumber : item.reference } 
+                  <Text subhead gray> { '#'+ item?.createdBy?.group.name }
+                  </Text>
+              </Text>
               <Text title3 style={{ marginTop: 20 }}>
-                {DachatsInfo.name}
+              {item?.name}
               </Text>
             </View>
-            <TouchableOpacity  style={{ alignItems: 'center', justifyContent:'center' , borderRadius : 20 , backgroundColor: DachatsInfo.isUp? colors.green : colors.primary,  width: 40, height: 40 }} >
-                <Text headline1 white style={{ transform: [{ rotate: "315deg" }] }} > {DachatsInfo.createdByInitial} </Text>
+            <TouchableOpacity  style={{ alignItems: 'center', justifyContent:'center' , borderRadius : 20 , backgroundColor: item.isUp? colors.green : colors.primary,  width: 40, height: 40 }} >
+                <Text headline1 white style={{ transform: [{ rotate: "315deg" }] }} > {item.createdBy.tag} </Text>
             </TouchableOpacity>
           </View>
           <Text body2>
-            {DachatsInfo.motive}
+            {item.motivation}
           </Text>
           <Text subhead gray style={{ marginTop: 15 , marginLeft : 'auto' }} >
-            crée le {DachatsInfo.createdAt}
+            crée le { formatDate ( item.createdAt ) }
           </Text>
           <View
             style={{
@@ -132,8 +154,8 @@ const DaDetailsScreen = () => {
                 marginTop: 20,
               }}
             >
-              <LabelUpper2Row style={{ flex: 1 }} label={'Identifiant DA'} value={DachatsInfo.reference}/>
-              <LabelUpper2Row style={{ flex: 1 }} label={'Ligne de compte'} value={DachatsInfo.projectID} />
+              <LabelUpper2Row style={{ flex: 1 }} label={'Identifiant DA'} value={item.reference}/>
+              <LabelUpper2Row style={{ flex: 1 }} label={'Ligne de compte'} value={item.project.projectNumber} />
             </View>
             <View
               style={{
@@ -142,8 +164,8 @@ const DaDetailsScreen = () => {
                 marginBottom: 10,
               }}
             >
-              <LabelUpper2Row style={{ flex: 1 }} label={'Type Prestation'} value={DachatsInfo.prestationType} />
-              <LabelUpper2Row style={{ flex: 1 }} label={'Montant TTC'} value={DachatsInfo.amountTTC} />
+              <LabelUpper2Row style={{ flex: 1 }} label={'Type Prestation'} value={item.prestationType} />
+              <LabelUpper2Row style={{ flex: 1 }} label={'Montant TTC'} value={'XOF '+ item.amountTTC} />
             </View>
             <View
               style={{
@@ -152,12 +174,12 @@ const DaDetailsScreen = () => {
                 marginBottom: 5,
               }}
             >
-              <LabelUpper2Row style={{ flex: 1 }} label={'Bon de commande'} value={'BC'+DachatsInfo.bcNumber} />
-              <LabelUpper2Row style={{ flex: 1 }} label={'Statut'} value={DachatsInfo.status} />
+              <LabelUpper2Row style={{ flex: 1 }} label={'Bon de commande'} value={'BC'+item.bcNumber} />
+              <LabelUpper2Row style={{ flex: 1 }} label={'Statut'} value={item.status.status} />
             </View>
           </View>
           <Text title3>{'Annexes'}</Text>
-          <ListMenuIcon style={{ paddingTop: 20 }} icon={'add-business'} iconColor = {colors.primary}  title={DachatsInfo.providedBy} />
+          <ListMenuIcon style={{ paddingTop: 20 }} icon={'add-business'} iconColor = {colors.primary}  title={item.providedBy.name} />
           <ListMenuIcon 
             style={{ paddingVertical: 10 }} 
             icon={'history'} iconColor = {colors.primary} 
@@ -184,13 +206,7 @@ const DaDetailsScreen = () => {
         </Button>
         <Button
             style={{ flex : 1, marginLeft: 5 , marginRight: 20,  }}
-            onPress={() => {
-                setModifyLoading(true);
-                setTimeout(() => {
-                setModifyLoading(false)
-                
-                }, 100)
-            }}
+            onPress={navigateToDaEdit}
             loading={modifyLoading}
             >
             {'Modifier'}

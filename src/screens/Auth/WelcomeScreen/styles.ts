@@ -10,6 +10,12 @@ const photoIconSize = imageSize * 0.3
 const photoIconRadius = imageSize * 0.3 / 2
 
 const Styles = StyleSheet.create({
+    imageBackground : {
+      justifyContent: 'center',
+      width : '100%',
+      aspectRatio : 4/1,
+      //backgroundColor : 'white'
+    },
     container: {
       flex: 1,
       alignItems: 'center',
@@ -43,7 +49,7 @@ const Styles = StyleSheet.create({
       paddingHorizontal: 30,
       marginBottom: 30,
       textAlign: 'center',
-      color: colors.gray,
+      color: colors.secondary,
     },
     loginContainer: {
       width: '70%',

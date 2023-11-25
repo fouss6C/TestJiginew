@@ -11,7 +11,9 @@ export default StyleSheet.create({
     contain: {
     flex: 1,
     },
-    
+    paddingFlatList: {
+        paddingHorizontal: 15,
+    },
     item: {
     paddingTop: 15,
     paddingBottom: 15,

@@ -6,7 +6,6 @@ import Text  from '../../components/Text'
 import colors from '../../theme/colors'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import ProjectInfo from '../../assets/data/ProjectLineInfo'
 import styles from './styles'
 import Button from '../../components/Button'
 import SelectOptionModal from '../../components/SelectOptionModal'
@@ -19,15 +18,15 @@ const AccountDetailsScreen = () => {
     const [modifyLoading, setModifyLoading] = useState(false)
     const navigation = useNavigation()
     const route = useRoute()
-    const [item, setItem] = useState(ProjectInfo)
+    const [item, setItem] = useState(route?.params?.item)
     const [statusSelected , setStatusSelected] = useState('')
     const [statusModalVisible , setStatusModalVisible] = useState(false)
 
     useEffect(() => {
         if (route?.params?.item) {
           // get the DA information from API , by ID 
-          setItem(route?.params?.item)
-          navigation.setOptions({headerTitle :'Projet '+ route?.params?.item.projectID })
+          //setItem(route?.params?.item)
+          navigation.setOptions({headerTitle :'Projet '+ route?.params?.item.projectNumber })
         }
     }, [route?.params?.item])
 
@@ -66,23 +65,23 @@ const AccountDetailsScreen = () => {
             }}
           >
             <View style={{ flex: 1 }}>
-                <Text title2 style ={{ fontFamily : 'Roboto'}}>{ProjectInfo.projectID } 
-                    <Text subhead gray> { '#'+ProjectInfo.ownedByService }
+                <Text title2 style ={{ fontFamily : 'Roboto'}}>{item.projectNumber } 
+                    <Text subhead gray> { '#'+item.group.name }
                     </Text>
                 </Text>
               <Text title3 style={{ marginTop: 20 }}>
-                {ProjectInfo.name}
+                {item.name}
               </Text>
             </View>
-            <TouchableOpacity  style={{ alignItems: 'center', justifyContent:'center' , borderRadius : 20 , backgroundColor: ProjectInfo.isUp? colors.green : colors.primary,  width: 40, height: 40 }} >
-                <Text headline1 white style={{ transform: [{ rotate: "315deg" }] }} > {ProjectInfo.ownedByInitial} </Text>
+            <TouchableOpacity  style={{ alignItems: 'center', justifyContent:'center' , borderRadius : 20 , backgroundColor: item.isUp? colors.green : colors.primary,  width: 40, height: 40 }} >
+                <Text headline1 white style={{ transform: [{ rotate: "315deg" }] }} > {item.group.tag} </Text>
             </TouchableOpacity>
           </View>
           <Text body2>
-            {ProjectInfo.motive}
+            {item.motive}
           </Text>
           <Text subhead gray style={{ marginTop: 15 , marginLeft : 'auto' }} >
-            crée le {ProjectInfo.createdAt}
+            crée le {item.createdAt || '20-11-2023'}
           </Text>
           <View
             style={{
@@ -103,8 +102,8 @@ const AccountDetailsScreen = () => {
                 marginTop: 20,
               }}
             >
-                <LabelUpper2Row style={{ flex: 1 }} label={'Solde'} value={ProjectInfo.balance}/>
-                <LabelUpper2Row style={{ flex: 1 }} label={'Compte systeme'} value={ProjectInfo.actID} />
+                <LabelUpper2Row style={{ flex: 1 }} label={'Solde'} value={''+item.balance}/>
+                <LabelUpper2Row style={{ flex: 1 }} label={'Compte système'} value={''+item.acctID} />
             </View>
             <View
               style={{
@@ -113,8 +112,8 @@ const AccountDetailsScreen = () => {
                 marginBottom: 10,
               }}
             >
-                <LabelUpper2Row style={{ flex: 1 }} label={'Type'} value={ProjectInfo.type} />
-                <LabelUpper2Row style={{ flex: 1 }} label={'Statut'} value={ProjectInfo.status} />
+                <LabelUpper2Row style={{ flex: 1 }} label={'Type'} value={''+item.type || 'Capex'} />
+                <LabelUpper2Row style={{ flex: 1 }} label={'Statut'} value={''+item.status.status} />
             </View>
             <View
               style={{
@@ -123,8 +122,8 @@ const AccountDetailsScreen = () => {
                 marginBottom: 10,
               }}
             >
-                <LabelUpper2Row style={{ flex: 1 }} label={'Montant HT'} value={ProjectInfo.amountHT} />
-                <LabelUpper2Row style={{ flex: 1 }} label={'Montant TTC'} value={ProjectInfo.amountTTC} />
+                <LabelUpper2Row style={{ flex: 1 }} label={'Montant HT'} value={''+item.amountHT} />
+                <LabelUpper2Row style={{ flex: 1 }} label={'Montant TTC'} value={''+item.amountTTC} />
             </View>
             <View
               style={{
@@ -133,8 +132,8 @@ const AccountDetailsScreen = () => {
                 marginBottom: 5,
               }}
             >
-                <LabelUpper2Row style={{ flex: 1 }} label={'Numero BC'} value={'BC'+ProjectInfo.bcNumber} />
-                <LabelUpper2Row style={{ flex: 1 }} label={'Numero DA'} value={'DA'+ProjectInfo.daNumber} />
+                <LabelUpper2Row style={{ flex: 1 }} label={'Numero BC'} value={'BC'+item.bcID.bcNumber} />
+                <LabelUpper2Row style={{ flex: 1 }} label={'Numero DA'} value={'DA'+item.daID.daNumber} />
             </View>
             <View
               style={{
@@ -143,12 +142,12 @@ const AccountDetailsScreen = () => {
                 marginBottom: 5,
               }}
             >
-                <LabelUpper2Row style={{ flex: 1 }} label={'Transfer IN'} value={ProjectInfo.transferIn} />
-                <LabelUpper2Row style={{ flex: 1 }} label={'Transfer OUT'} value={ProjectInfo.transferOut} />
+                <LabelUpper2Row style={{ flex: 1 }} label={'Transfer IN'} value={''+item.transferts[0]?.type} />
+                <LabelUpper2Row style={{ flex: 1 }} label={'Transfer OUT'} value={''+item.transferOut} />
             </View>
           </View>
           <Text title3>{'Annexes'}</Text>
-          <ListMenuIcon style={{ paddingVertical: 10 }} icon={'history'} iconColor = {colors.primary} title={'Voir historique des transactions'} />
+          <ListMenuIcon style={{ paddingVertical: 10 }} icon={'history'} iconColor = {colors.primary} title = {'Voir historique des transactions'} />
         </ScrollView>
       </View>
       <View style = {{ flexDirection : 'row', marginVertical: 20 }}>
@@ -172,7 +171,6 @@ const AccountDetailsScreen = () => {
                 setModifyLoading(true);
                 setTimeout(() => {
                 setModifyLoading(false)
-                
                 }, 100)
             }}
             loading={modifyLoading}

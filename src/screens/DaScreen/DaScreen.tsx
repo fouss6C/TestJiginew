@@ -1,5 +1,5 @@
-import { View, FlatList, TouchableOpacity, RefreshControl,  } from 'react-native'
-import React , { useContext, useEffect, useState } from 'react'
+import { View, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator,  } from 'react-native'
+import React , { useContext, useEffect, useMemo, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import  TextInput  from '../../components/TextInput'
 import IconFont from 'react-native-vector-icons/FontAwesome5'
@@ -21,6 +21,7 @@ import EmptyList from '../../components/EmptyList'
 import axios from 'axios'
 import { BaseURL } from '../../assets/config/config'
 import { AuthContext } from '../Context/AuthContextProvider'
+import ProjectCard01 from '../../components/ProjectCard/ProjectCard01'
 
 
 
@@ -45,15 +46,18 @@ const tabs = [
 
 const DaScreen = () => {
   const insets = useSafeAreaInsets()
-  const [refreshing] = useState(false)
+  const [refreshing ] = useState(false)
   const [category, setCategory] = useState('')
   const [categories, setCategories] = useState([])
   const navigation = useNavigation()
   const { userToken } = useContext(AuthContext)
   // filter hooks 
-  const [daStatus] = useState(DaStatus)
-  const [daActID] = useState(DaActID)
-  const [daOwner] = useState(DaOwner)
+  const [daStatus, setDaStatus] = useState([])
+  const [daActID , setDaActID ] = useState([])
+  const [daOwner , setDaOwner] = useState([])
+  
+  const [loadingAcct , setLoadingAcct] = useState(true)
+  const [loadingGroup , setLoadingGroup] = useState(true)
 
   const [actModalVisible , setActModalVisible]=useState(false)
   const [statusModalVisible , setStatusModalVisible]=useState(false)
@@ -61,7 +65,8 @@ const DaScreen = () => {
 
   const [tab, setTab] = useState(tabs[0])
   const [ demandes , setDemandes ] = useState([])
- 
+  const [ demandeSummary , setDemandeSummary ] = useState([])
+
   useEffect( () => {
     const response = async () => {
       await axios.get(`${BaseURL}/demandeAchats`,
@@ -88,8 +93,192 @@ const DaScreen = () => {
       })
     }
     response()
+  }, [refreshing])
+  useEffect( () => {
+    const response = async () => {
+      await axios.get(`${BaseURL}/demandeAchats/summary`,
+    { headers: {
+      //'Content-Type': 'multipart/form-data' , 
+      'Authorization' : `Bearer ${userToken?.access_token}`,
+      'Accept' : 'application/json'
+    }}
+    ).then(res => {
+        console.log (res.data)
+        setDemandeSummary (() => {
+          return res.data.map((item) => 
+            {
+              let x = { 
+                "name" :item.name, //item.name.includes('Interne') ? 'Interne' : item.name , 
+                "population" : item.population , 
+                "description" : item.description , 
+                "tag" : item.tag.includes('InternalApproval') ? 'InternalApproval' :item.tag ,
+                "color" : item.legendFontColor, 
+                "legendFontColor" : "#7F7F7F"
+              }
+
+              return x
+            }
+          )
+        }
+        )
+        console.log ( res.data)
+      }).catch((error)=> {
+        if( error.code == 'ERR_BAD_REQUEST') {
+          //Alert.alert( 'No response from server , check the URL ..')
+          console.log('Problème de chargement du rapport des demandes'+error.message)
+        } else {
+         // Alert.alert(error.message)
+         console.log(error.message)
+        }
+        //console.log(error.code)
+      }).then( function () {
+        //
+      })
+    }
+    response()
   }, [])
-  
+
+  useEffect( () => {
+    const response = async () => {
+      await axios.get(`${BaseURL}/projets/projectIDs`,
+    { headers: {
+      //'Content-Type': 'multipart/form-data' , 
+      'Authorization' : `Bearer ${userToken?.access_token}`,
+      'Accept' : 'application/json'
+    }}
+    ).then(res => {
+        console.log (res.data)
+        const formatProjectList = () => {
+          return res.data.map((item) => 
+            {
+              let x = { 
+                id : item.id,
+                iconName: item.id ==1 ? 'plus-circle' : 'minus-circle' ,
+                iconColor: colors.primary,
+                tag : item.projectID, 
+                text : item.name, 
+                description : item.name,
+              }
+              return x
+            }
+          )
+        }
+        setDaActID(formatProjectList)
+        setLoadingAcct(false)
+
+      }).catch((error)=> {
+        if( error.code == 'ERR_BAD_REQUEST') {
+          //Alert.alert( 'No response from server , check the URL ..')
+          console.log(error.message)
+        } else {
+         // Alert.alert(error.message)
+         console.log(error.message)
+        }
+      }
+      ).then( function () {
+        //
+      })
+    }
+    response()
+  }, [])
+
+  useEffect( () => {
+    const response = async () => {
+      await axios.get(`${BaseURL}/daStatuses`,
+    { headers: {
+      //'Content-Type': 'multipart/form-data' , 
+      'Authorization' : `Bearer ${userToken?.access_token}`,
+      'Accept' : 'application/json'
+    }}
+    ).then(res => {
+        console.log (res.data)
+        const formatStatusList = () => {
+          return res.data.map((item) => 
+            {
+              let x = { 
+                id : item.id,
+                iconName: item.id == 1 ? 'plus-circle' : 'minus-circle' ,
+                iconColor: item.id <= 4 ? colors.primary : colors.secondary,
+                tag : item.tag, 
+                text : item.status, 
+                description : '',
+              }
+              return x
+            }
+          )
+        }
+        setDaStatus(formatStatusList)
+      }).catch((error)=> {
+        if( error.code == 'ERR_BAD_REQUEST') {
+          //Alert.alert( 'No response from server , check the URL ..')
+          console.log(error.message)
+        } else {
+         // Alert.alert(error.message)
+         console.log(error.message)
+        }
+        console.log(error.code)
+      }).then( function () {
+        //
+      })
+    }
+    response()
+  }, [])
+
+  useEffect( () => {
+    const response = async () => {
+      await axios.get(`${BaseURL}/groupes`,
+    { headers: {
+      //'Content-Type': 'multipart/form-data' , 
+      'Authorization' : `Bearer ${userToken?.access_token}`,
+      'Accept' : 'application/json'
+    }}
+    ).then(res => {
+        console.log (res.data)
+        const formatGroupList = () => {
+          return res.data.map((item) => 
+            {
+              let x = { 
+                  id : item.id,
+                  iconName: item.id ==1 ? 'plus-circle' : 'minus-circle' ,
+                  iconColor: item.id < 4 ? colors.primary : colors.secondary,
+                  tag : item.groupID, 
+                  text : item.name, 
+                  description : item.tag,
+              }
+              return x
+            }
+          )
+        }
+        setDaOwner(formatGroupList)
+        setLoadingGroup(false)
+      }).catch((error)=> {
+        if( error.code == 'ERR_BAD_REQUEST') {
+          //Alert.alert( 'No response from server , check the URL ..')
+          console.log(error.message)
+        } else {
+         // Alert.alert(error.message)
+         console.log(error.message)
+        }
+        console.log(error.code)
+      }).then( function () {
+        //
+      })
+    }
+    response()
+  }, [])
+
+  const formatDate = (date) => {
+    let d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2)
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+    return [year, month, day].join('-');
+}
   const onAccountSelect = (option) => {
     //setActID(option)
     setActModalVisible(false)
@@ -107,7 +296,7 @@ const DaScreen = () => {
   }
 
   const navigateToDaDetail = (item) => () => {
-    navigation.navigate('DaDetails', {item: item })
+    navigation.navigate('DaDetails', { item: item })
   }
 
   const filterCategory = (text) => {
@@ -115,8 +304,9 @@ const DaScreen = () => {
     if (text) {
       setCategories(demandes.filter((item) => 
       haveChildren(item.name, text) || haveChildren(item.status?.tag, text)|| 
-      haveChildren(item.daNumber, text) || haveChildren(item.projectID?.projectID, text) ||
-      haveChildren(item.projectID?.actID, text) || haveChildren(item.createdBy?.groupID?.groupID, text)
+      haveChildren(item.daNumber, text) || haveChildren(item.project?.projectNumber, text) ||
+      haveChildren(item.project?.acctID, text) || haveChildren(item.createdBy?.group?.groupID, text)
+      || haveChildren(item.reference, text)
       ));
     } else {
       setCategories(demandes)
@@ -161,9 +351,9 @@ const DaScreen = () => {
             <IconFont name="sliders-h" size={26} color={colors.primary} />
           </TouchableOpacity> */}
         </View>
-        {category.length > 0 ? null : (<PieChart data={DemandesSummary} />)}
+        {category.length > 0 ? null : (<PieChart data={demandeSummary} />)}
         <TabTag
-          style={{ paddingHorizontal: 10, paddingVertical: 10 }}
+          style={{ paddingHorizontal: 1, paddingVertical: 20 }}
           tabs={tabs}
           tab={tab}
           onChange={(tabData) => 
@@ -189,7 +379,7 @@ const DaScreen = () => {
        
         <View style = {{ flex : 1 , width : '100%'}}>
         <FlatList
-            contentContainerStyle={{}}
+            contentContainerStyle={[ styles.paddingFlatList ]}
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={true}
             refreshControl={
@@ -197,47 +387,71 @@ const DaScreen = () => {
                 colors={[colors.primary]}
                 tintColor={colors.primary}
                 refreshing={refreshing}
-                onRefresh={() => {}}
+                onRefresh={()=> {}}
               />
             }
-            ListEmptyComponent={({item}) => (<EmptyList  item = {category}/>) }
+            ListEmptyComponent={({item}) => 
+             category ? (<EmptyList  item = {category}/>) : 
+            (<ActivityIndicator animating={true} color={colors.primary} />)
+          }
             data={categories}
             keyExtractor= {(item) => item.id}
             renderItem={({ item }) => (
-              <Transaction2Col
-                key={item.id}
-                initial ={''+item.createdBy?.tag}
-                reference = { item.daNumber? 'DA' + item.daNumber : 'DA' + item.reference }
-                actID = {item.projectID?.projectID}
-                name={item.name}
-                date={item.createdAt}
-                status={item.status?.status}
-                price={'KX'+ (item.amountTTC / Math.pow(10,3)).toFixed(2)}
-                isUp={item.isUp}
-                backgroundIcon={item.createdBy?.groupID?.color?.tag}
+              <ProjectCard01
+                title={ (item.name).slice(0, 27) + '..'}
+                description={ (item.motivation).slice(0, 86) + '...' }
+                days={item.status?.status}
+                status = { item.status.id }
+                reference = { item.daNumber? 'DA'+item.daNumber : item.reference }
+                label = { formatDate (item.createdAt) }
+                //members={item.members}
+                progress={'MX'+ (item.amountTTC / Math.pow(10,6)).toFixed(2)}
                 onPress={navigateToDaDetail(item)}
+                style={{
+                  marginBottom: 10,
+                }}
               />
             )}
         />
         </View>
       </View>
-      <SearchOptionModal
+      {
+        !loadingAcct ?
+        (
+        <SearchOptionModal
           isVisible={actModalVisible}
-          options={daActID}
+          options={ daActID }
           onChange = {onAccountSelect}
           onSwipeComplete={() => setActModalVisible(false)}
-      />
+        />
+        ) : (
+          <>
+          </>
+        )
+
+      }
+      {
+        !loadingGroup ?
+        (
+        <SearchOptionModal
+          isVisible={ownerModalVisible}
+          options={daOwner}
+          onChange = {onOwnerSelect}
+          onSwipeComplete={() => setOwnerModalVisible(false)}
+        />
+        ) : 
+        (
+          <>
+          </>
+        )
+      }
+      
+
       <SelectOptionModal
           isVisible={statusModalVisible}
           options={daStatus}
           onChange = {onStatusSelect}
           onSwipeComplete={() => setStatusModalVisible(false)}
-      />
-      <SearchOptionModal
-          isVisible={ownerModalVisible}
-          options={daOwner}
-          onChange = {onOwnerSelect}
-          onSwipeComplete={() => setOwnerModalVisible(false)}
       />
     </View>
   )
